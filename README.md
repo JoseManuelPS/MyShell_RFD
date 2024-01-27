@@ -1,3 +1,3 @@
 # MyShell_RFD
 
-This is my setup to work fast and smarter as SRE, SysAdmin.
+This is my setup to work fast, clean and smarter as SRE, SysAdmin.
