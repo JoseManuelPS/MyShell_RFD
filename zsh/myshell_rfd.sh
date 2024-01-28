@@ -1,7 +1,7 @@
 #!/bin/bash
 ###############################################################################
 ##        Name: myshell_rfd.sh                                                #
-##        Date: 30/12/2023                                                    #
+##        Date: 28/01/2024                                                    #
 ## Description: Custom configuration for ZSH.                                 #
 ##----------------------------------------------------------------------------#
 ##      Editor: José Manuel Plana Santos                                      #
@@ -12,7 +12,7 @@
 
 # Script information.
 scriptName="MyShell_RFD"
-scriptVersion="v1.0"
+scriptVersion="v1.1"
 
 # Script directories.
 scriptPath=$(cd $(dirname $0) ; pwd -P)/
@@ -245,7 +245,7 @@ Minikube () {
     read -p "Do you want to autocomplete minikube commands? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
       echo "##  Minikube" >> $msrfdConfigFile
-      echo "source <(minikube completion zsh); compdef _minikube minikube" >> $msrfdConfigFile
+      echo "source <(minikube completion zsh)" >> $msrfdConfigFile
       echo "" >> $msrfdConfigFile
     fi
     echo -e "${green}Done!${nc}\n\n"
