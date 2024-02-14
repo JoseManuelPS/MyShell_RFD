@@ -210,7 +210,7 @@ Kubectl () {
       echo "compdef __start_kubectl k" >> $msrfdConfigFile
       echo "alias k=kubectl" >> $msrfdConfigFile
       echo "compdef __start_kubectl ka" >> $msrfdConfigFile
-      echo "alias ka=\"kubectl apply\"" >> $msrfdConfigFile
+      echo "alias ka=\"kubectl apply -f\"" >> $msrfdConfigFile
       echo "compdef __start_kubectl kc" >> $msrfdConfigFile
       echo "alias kc=\"kubectl create\"" >> $msrfdConfigFile
       echo "compdef __start_kubectl kd" >> $msrfdConfigFile
