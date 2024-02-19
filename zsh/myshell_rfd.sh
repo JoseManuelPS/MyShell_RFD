@@ -1,7 +1,7 @@
 #!/bin/bash
 ###############################################################################
 ##        Name: myshell_rfd.sh                                                #
-##        Date: 28/01/2024                                                    #
+##        Date: 19/02/2024                                                    #
 ## Description: Custom configuration for ZSH.                                 #
 ##----------------------------------------------------------------------------#
 ##      Editor: José Manuel Plana Santos                                      #
@@ -12,7 +12,7 @@
 
 # Script information.
 scriptName="MyShell_RFD"
-scriptVersion="v1.1"
+scriptVersion="v1.2"
 
 # Script directories.
 scriptPath=$(cd $(dirname $0) ; pwd -P)/
@@ -158,7 +158,7 @@ FZF () {
       rm -f $execUser_Home/.fzf.bash
       mv $execUser_Home/.fzf.zsh $ZSH_CUSTOM/fzf
       echo "##  FZF" >> $msrfdConfigFile
-      echo "[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh" >> $msrfdConfigFile
+      echo "[ -f ~/.oh-my-zsh/custom/fzf/.fzf.zsh ] && source ~/.oh-my-zsh/custom/fzf/.fzf.zsh" >> $msrfdConfigFile
       echo "" >> $msrfdConfigFile
       sed -i '/.*fzf.*/d' $execUser_Home/.zshrc
     fi
