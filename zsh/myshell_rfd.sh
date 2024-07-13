@@ -25,13 +25,13 @@ blue='\033[0;34m'
 nc='\033[0m'
 
 # Checking binary of package manager.
-if [ $(which apk | wc -l) -eq 1 ]; then
+if [ $(which apk 2>/dev/null | wc -l) -eq 1 ]; then
   pkgManager="sudo apk add"
   osFamily='Alpine'
-elif [ $(which apt | wc -l) -eq 1 ]; then
+elif [ $(which apt 2>/dev/null | wc -l) -eq 1 ]; then
   pkgManager="sudo apt install -y"
   osFamily='Debian'
-elif [ $(which dnf | wc -l) -eq 1 ]; then
+elif [ $(which dnf 2>/dev/null | wc -l) -eq 1 ]; then
   pkgManager="sudo dnf install -y"
   osFamily='Fedora'
 fi
@@ -123,7 +123,7 @@ Main () {
 
 AWS () {
 
-  if [ $(which aws | wc -l) -eq 1 ]; then
+  if [ $(which aws 2>/dev/null | wc -l) -eq 1 ]; then
     echo -e "###################################\n# ${blue}AWS${nc}\n###################################\n"
     read -p "Do you want to autocomplete aws commands? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
@@ -138,7 +138,7 @@ AWS () {
 
 Docker () {
 
-  if [ $(which docker | wc -l) -eq 1 ]; then
+  if [ $(which docker 2>/dev/null | wc -l) -eq 1 ]; then
     echo -e "###################################\n# ${blue}Docker${nc}\n###################################\n"
     read -p "Do you want to add docker plugin? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
@@ -171,7 +171,7 @@ FZF () {
 
 Helm () {
 
-  if [ $(which helm | wc -l) -eq 1 ]; then
+  if [ $(which helm 2>/dev/null | wc -l) -eq 1 ]; then
     echo -e "###################################\n# ${blue}Helm${nc}\n###################################\n"
     read -p "Do you want to autocomplete helm commands? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
@@ -203,7 +203,7 @@ K () {
 
 Kubectl () {
 
-  if [ $(which kubectl | wc -l) -eq 1 ]; then
+  if [ $(which kubectl 2>/dev/null | wc -l) -eq 1 ]; then
     echo -e "###################################\n# ${blue}Kubectl${nc}\n###################################\n"
     read -p "Do you want to autocomplete kubectl commands? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
@@ -242,7 +242,7 @@ Kubectl () {
 
 Minikube () {
 
-  if [ $(which minikube | wc -l) -eq 1 ]; then
+  if [ $(which minikube 2>/dev/null | wc -l) -eq 1 ]; then
     echo -e "###################################\n# ${blue}Minikube${nc}\n###################################\n"
     read -p "Do you want to autocomplete minikube commands? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
@@ -257,7 +257,7 @@ Minikube () {
 
 OC () {
 
-  if [ $(which oc | wc -l) -eq 1 ]; then
+  if [ $(which oc 2>/dev/null | wc -l) -eq 1 ]; then
     echo -e "###################################\n# ${blue}OC${nc}\n###################################\n"
     read -p "Do you want to autocomplete oc commands? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
@@ -297,7 +297,7 @@ PowerLevel10K () {
 
 Python () {
 
-  if [ $(which python3 | wc -l) -eq 1 ]; then
+  if [ $(which python3 2>/dev/null | wc -l) -eq 1 ]; then
     echo -e "###################################\n# ${blue}Python3${nc}\n###################################\n"
     read -p "Do you want to create Python virtual enviroment? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
@@ -316,7 +316,7 @@ Python () {
 
 Tridentctl () {
 
-  if [ $(which tridentctl | wc -l) -eq 1 ]; then
+  if [ $(which tridentctl 2>/dev/null | wc -l) -eq 1 ]; then
     echo -e "###################################\n# ${blue}Tridentctl${nc}\n###################################\n"
     read -p "Do you want to autocomplete tridentctl commands? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
@@ -398,13 +398,13 @@ Check_Dependencies () {
   echo -e "###################################\n# ${blue}Checking dependencies${nc}\n###################################"
 
   # Checking 'curl' binary.
-  checkBin=$(which curl | wc -l)
+  checkBin=$(which curl 2>/dev/null | wc -l)
   if [ $checkBin -eq 0 ]; then
 
     echo "Trying to install curl..."
     $pkgManager curl
 
-    checkBin=$(which curl | wc -l)
+    checkBin=$(which curl 2>/dev/null | wc -l)
     if [ $checkBin -eq 0 ]; then
       errors=$errors"[curl] Not curl binary found. Please install it manually and try again.\n"
       Catch
@@ -412,13 +412,13 @@ Check_Dependencies () {
   fi
 
   # Checking 'git' binary.
-  checkBin=$(which git | wc -l)
+  checkBin=$(which git 2>/dev/null | wc -l)
   if [ $checkBin -eq 0 ]; then
 
     echo "Trying to install git..."
     $pkgManager git
 
-    checkBin=$(which git | wc -l)
+    checkBin=$(which git 2>/dev/null | wc -l)
     if [ $checkBin -eq 0 ]; then
       errors=$errors"[git] Not git binary found. Please install it manually and try again.\n"
       Catch
@@ -426,7 +426,7 @@ Check_Dependencies () {
   fi
 
   # Checking 'zsh' binary.
-  checkBin=$(which zsh | wc -l)
+  checkBin=$(which zsh 2>/dev/null | wc -l)
   if [ $checkBin -eq 0 ]; then
 
     echo "Trying to install zsh..."
@@ -437,7 +437,7 @@ Check_Dependencies () {
       chsh -s $(which zsh)
     fi    
 
-    checkBin=$(which zsh | wc -l)
+    checkBin=$(which zsh 2>/dev/null | wc -l)
     if [ $checkBin -eq 0 ]; then
       errors=$errors"[zsh] Not zsh binary found. Please install it manually and try again.\n"
       Catch
