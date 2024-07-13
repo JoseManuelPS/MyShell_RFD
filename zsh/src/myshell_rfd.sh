@@ -1,7 +1,7 @@
 #!/bin/bash
 ###############################################################################
 ##        Name: myshell_rfd.sh                                                #
-##        Date: 19/02/2024                                                    #
+##        Date: 13/07/2024                                                    #
 ## Description: Custom configuration for ZSH.                                 #
 ##----------------------------------------------------------------------------#
 ##      Editor: José Manuel Plana Santos                                      #
@@ -12,7 +12,7 @@
 
 # Script information.
 scriptName="MyShell_RFD"
-scriptVersion="v1.2"
+scriptVersion="v1.3"
 
 # Script directories.
 scriptPath=$(cd $(dirname $0) ; pwd -P)/
@@ -94,6 +94,8 @@ Main () {
   OC
 
   PowerLevel10K
+  
+  Python
 
   Tridentctl
 
@@ -287,6 +289,25 @@ PowerLevel10K () {
         echo "##  PowerLevel10K" >> $msrfdConfigFile
         echo -e "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh\n" >> $msrfdConfigFile
       fi
+    fi
+    echo -e "${green}Done!${nc}\n\n"
+  fi
+}
+
+
+Python () {
+
+  if [ $(which python3 | wc -l) -eq 1 ]; then
+    echo -e "###################################\n# ${blue}Python3${nc}\n###################################\n"
+    read -p "Do you want to create Python virtual enviroment? [y/n]: " selectedOption
+    if [ "$selectedOption" == "y" ]; then
+      echo "##  Python3" >> $msrfdConfigFile
+      if [ ! -d "$execUser_Home/.python3-venv-default" ]; then
+        python3 -m venv $execUser_Home/.python3-venv-default
+        mkdir -p $execUser_Home/.python3-venv-default
+      fi
+      echo "source ~/.python3-venv-default/bin/activate" >> $msrfdConfigFile
+      echo "" >> $msrfdConfigFile
     fi
     echo -e "${green}Done!${nc}\n\n"
   fi
