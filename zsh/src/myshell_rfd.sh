@@ -306,7 +306,7 @@ Python () {
         python3 -m venv $execUser_Home/.python3-venv-default
         mkdir -p $execUser_Home/.python3-venv-default
       fi
-      echo "source ~/.python3-venv-default/bin/activate" >> $msrfdConfigFile
+      echo "source $execUser_Home/.python3-venv-default/bin/activate" >> $msrfdConfigFile
       echo "" >> $msrfdConfigFile
     fi
     echo -e "${green}Done!${nc}\n\n"
