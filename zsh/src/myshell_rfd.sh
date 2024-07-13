@@ -75,7 +75,7 @@ Main () {
 
   # Preparing config file
   msrfdConfigFile=$execUser_Home/.myshell_rfd
-  echo -e "# MyShell_RFD Config\n" >> $msrfdConfigFile
+  echo -e "# MyShell_RFD Config\n" >> "$msrfdConfigFile"
 
   AWS
 
@@ -127,9 +127,9 @@ AWS () {
     echo -e "###################################\n# ${blue}AWS${nc}\n###################################\n"
     read -p "Do you want to autocomplete aws commands? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
-      echo "##  AWS" >> $msrfdConfigFile
-      echo "complete -C '/usr/local/bin/aws_completer' aws" >> $msrfdConfigFile
-      echo "" >> $msrfdConfigFile
+      echo "##  AWS" >> "$msrfdConfigFile"
+      echo "complete -C '/usr/local/bin/aws_completer' aws" >> "$msrfdConfigFile"
+      echo "" >> "$msrfdConfigFile"
     fi
     echo -e "${green}Done!${nc}\n\n"
   fi
@@ -151,7 +151,7 @@ Docker () {
 
 FZF () {
 
-  if [ ! -d $ZSH_CUSTOM/fzf ]; then
+  if [ ! -d "$ZSH_CUSTOM/fzf" ]; then
     echo -e "###################################\n# ${blue}FZF${nc}\n###################################\n"
     read -p "Do you want to install fzf plugin? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
@@ -159,9 +159,9 @@ FZF () {
       $ZSH_CUSTOM/fzf/install
       rm -f $execUser_Home/.fzf.bash
       mv $execUser_Home/.fzf.zsh $ZSH_CUSTOM/fzf
-      echo "##  FZF" >> $msrfdConfigFile
-      echo "[ -f ~/.oh-my-zsh/custom/fzf/.fzf.zsh ] && source ~/.oh-my-zsh/custom/fzf/.fzf.zsh" >> $msrfdConfigFile
-      echo "" >> $msrfdConfigFile
+      echo "##  FZF" >> "$msrfdConfigFile"
+      echo "[ -f ~/.oh-my-zsh/custom/fzf/.fzf.zsh ] && source ~/.oh-my-zsh/custom/fzf/.fzf.zsh" >> "$msrfdConfigFile"
+      echo "" >> "$msrfdConfigFile"
       sed -i '/.*fzf.*/d' $execUser_Home/.zshrc
     fi
     echo -e "${green}Done!${nc}\n\n"
@@ -175,9 +175,9 @@ Helm () {
     echo -e "###################################\n# ${blue}Helm${nc}\n###################################\n"
     read -p "Do you want to autocomplete helm commands? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
-      echo "##  Helm" >> $msrfdConfigFile
-      echo "source <(helm completion zsh); compdef _helm helm" >> $msrfdConfigFile
-      echo "" >> $msrfdConfigFile
+      echo "##  Helm" >> "$msrfdConfigFile"
+      echo "source <(helm completion zsh); compdef _helm helm" >> "$msrfdConfigFile"
+      echo "" >> "$msrfdConfigFile"
     fi
     echo -e "${green}Done!${nc}\n\n"
   fi
@@ -186,15 +186,15 @@ Helm () {
 
 K () {
 
-  if [ ! -d $ZSH_CUSTOM/plugins/k ]; then
+  if [ ! -d "$ZSH_CUSTOM/plugins/k" ]; then
     echo -e "###################################\n# ${blue}K${nc}\n###################################\n"
     read -p "Do you want to install custom k => z plugin? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
       git clone https://github.com/supercrabtree/k $ZSH_CUSTOM/plugins/k; sed -i 's/^k[[:space:]]/z /g' $ZSH_CUSTOM/plugins/k/k.sh
       plugins=$plugins" k"
-      echo "##  K" >> $msrfdConfigFile
-      echo "alias f=\"z -ha\"" >> $msrfdConfigFile
-      echo "" >> $msrfdConfigFile
+      echo "##  K" >> "$msrfdConfigFile"
+      echo "alias f=\"z -ha\"" >> "$msrfdConfigFile"
+      echo "" >> "$msrfdConfigFile"
     fi
     echo -e "${green}Done!${nc}\n\n"
   fi
@@ -207,33 +207,33 @@ Kubectl () {
     echo -e "###################################\n# ${blue}Kubectl${nc}\n###################################\n"
     read -p "Do you want to autocomplete kubectl commands? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
-      echo "##  Kubectl" >> $msrfdConfigFile
-      echo "source <(kubectl completion zsh); compdef _kubectl kubectl" >> $msrfdConfigFile
-      echo "compdef __start_kubectl k" >> $msrfdConfigFile
-      echo "alias k=kubectl" >> $msrfdConfigFile
-      echo "compdef __start_kubectl ka" >> $msrfdConfigFile
-      echo "alias ka=\"kubectl apply -f\"" >> $msrfdConfigFile
-      echo "compdef __start_kubectl kc" >> $msrfdConfigFile
-      echo "alias kc=\"kubectl create\"" >> $msrfdConfigFile
-      echo "compdef __start_kubectl kd" >> $msrfdConfigFile
-      echo "alias kd=\"kubectl describe\"" >> $msrfdConfigFile
-      echo "compdef __start_kubectl kdc" >> $msrfdConfigFile
-      echo "alias kdc=\"kubectl config delete-context\"" >> $msrfdConfigFile
-      echo "compdef __start_kubectl ke" >> $msrfdConfigFile
-      echo "alias ke=\"kubectl exec -ti\"" >> $msrfdConfigFile
-      echo "compdef __start_kubectl kg" >> $msrfdConfigFile
-      echo "alias kg=\"kubectl get\"" >> $msrfdConfigFile
-      echo "compdef __start_kubectl kgj" >> $msrfdConfigFile
-      echo "alias kgj=\"kubectl get -o json\"" >> $msrfdConfigFile
-      echo "compdef __start_kubectl kgy" >> $msrfdConfigFile
-      echo "alias kgy=\"kubectl get -o yaml\"" >> $msrfdConfigFile
-      echo "compdef __start_kubectl kl" >> $msrfdConfigFile
-      echo "alias kl=\"kubectl logs\"" >> $msrfdConfigFile
-      echo "compdef __start_kubectl kn" >> $msrfdConfigFile
-      echo "alias kn=\"kubectl config set-context --current --namespace\"" >> $msrfdConfigFile
-      echo "compdef __start_kubectl ku" >> $msrfdConfigFile
-      echo "alias ku=\"kubectl config use-context\"" >> $msrfdConfigFile
-      echo "" >> $msrfdConfigFile
+      echo "##  Kubectl" >> "$msrfdConfigFile"
+      echo "source <(kubectl completion zsh); compdef _kubectl kubectl" >> "$msrfdConfigFile"
+      echo "compdef __start_kubectl k" >> "$msrfdConfigFile"
+      echo "alias k=kubectl" >> "$msrfdConfigFile"
+      echo "compdef __start_kubectl ka" >> "$msrfdConfigFile"
+      echo "alias ka=\"kubectl apply -f\"" >> "$msrfdConfigFile"
+      echo "compdef __start_kubectl kc" >> "$msrfdConfigFile"
+      echo "alias kc=\"kubectl create\"" >> "$msrfdConfigFile"
+      echo "compdef __start_kubectl kd" >> "$msrfdConfigFile"
+      echo "alias kd=\"kubectl describe\"" >> "$msrfdConfigFile"
+      echo "compdef __start_kubectl kdc" >> "$msrfdConfigFile"
+      echo "alias kdc=\"kubectl config delete-context\"" >> "$msrfdConfigFile"
+      echo "compdef __start_kubectl ke" >> "$msrfdConfigFile"
+      echo "alias ke=\"kubectl exec -ti\"" >> "$msrfdConfigFile"
+      echo "compdef __start_kubectl kg" >> "$msrfdConfigFile"
+      echo "alias kg=\"kubectl get\"" >> "$msrfdConfigFile"
+      echo "compdef __start_kubectl kgj" >> "$msrfdConfigFile"
+      echo "alias kgj=\"kubectl get -o json\"" >> "$msrfdConfigFile"
+      echo "compdef __start_kubectl kgy" >> "$msrfdConfigFile"
+      echo "alias kgy=\"kubectl get -o yaml\"" >> "$msrfdConfigFile"
+      echo "compdef __start_kubectl kl" >> "$msrfdConfigFile"
+      echo "alias kl=\"kubectl logs\"" >> "$msrfdConfigFile"
+      echo "compdef __start_kubectl kn" >> "$msrfdConfigFile"
+      echo "alias kn=\"kubectl config set-context --current --namespace\"" >> "$msrfdConfigFile"
+      echo "compdef __start_kubectl ku" >> "$msrfdConfigFile"
+      echo "alias ku=\"kubectl config use-context\"" >> "$msrfdConfigFile"
+      echo "" >> "$msrfdConfigFile"
     fi
     echo -e "${green}Done!${nc}\n\n"
   fi
@@ -246,9 +246,9 @@ Minikube () {
     echo -e "###################################\n# ${blue}Minikube${nc}\n###################################\n"
     read -p "Do you want to autocomplete minikube commands? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
-      echo "##  Minikube" >> $msrfdConfigFile
-      echo "source <(minikube completion zsh)" >> $msrfdConfigFile
-      echo "" >> $msrfdConfigFile
+      echo "##  Minikube" >> "$msrfdConfigFile"
+      echo "source <(minikube completion zsh)" >> "$msrfdConfigFile"
+      echo "" >> "$msrfdConfigFile"
     fi
     echo -e "${green}Done!${nc}\n\n"
   fi
@@ -261,9 +261,9 @@ OC () {
     echo -e "###################################\n# ${blue}OC${nc}\n###################################\n"
     read -p "Do you want to autocomplete oc commands? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
-      echo "##  OC" >> $msrfdConfigFile
-      echo "source <(oc completion zsh); compdef _oc oc" >> $msrfdConfigFile
-      echo "" >> $msrfdConfigFile
+      echo "##  OC" >> "$msrfdConfigFile"
+      echo "source <(oc completion zsh); compdef _oc oc" >> "$msrfdConfigFile"
+      echo "" >> "$msrfdConfigFile"
     fi
     echo -e "${green}Done!${nc}\n\n"
   fi
@@ -272,7 +272,7 @@ OC () {
 
 PowerLevel10K () {
 
-  if [ ! -f $execUser_Home/.p10k.zsh ]; then
+  if [ ! -f "$execUser_Home/.p10k.zsh" ]; then
     echo -e "###################################\n# ${blue}PowerLevel10K${nc}\n###################################\n"
     read -p "Do you want to install powerlevel10k theme? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
@@ -286,8 +286,8 @@ PowerLevel10K () {
         sed -i '/^ZSH_THEME=/i# The ZSH_THEME was modified by MyShell_RFD' $execUser_Home/.zshrc
         sed -i '/^ZSH_THEME=/ s/^/# /' $execUser_Home/.zshrc
         sed -i '/^# ZSH_THEME=/ a ZSH_THEME=\"powerlevel10k/powerlevel10k\"' $execUser_Home/.zshrc
-        echo "##  PowerLevel10K" >> $msrfdConfigFile
-        echo -e "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh\n" >> $msrfdConfigFile
+        echo "##  PowerLevel10K" >> "$msrfdConfigFile"
+        echo -e "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh\n" >> "$msrfdConfigFile"
       fi
     fi
     echo -e "${green}Done!${nc}\n\n"
@@ -301,13 +301,13 @@ Python () {
     echo -e "###################################\n# ${blue}Python3${nc}\n###################################\n"
     read -p "Do you want to create Python virtual enviroment? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
-      echo "##  Python3" >> $msrfdConfigFile
+      echo "##  Python3" >> "$msrfdConfigFile"
       if [ ! -d "$execUser_Home/.python3-venv-default" ]; then
         python3 -m venv $execUser_Home/.python3-venv-default
         mkdir -p $execUser_Home/.python3-venv-default
       fi
-      echo "source ~/.python3-venv-default/bin/activate" >> $msrfdConfigFile
-      echo "" >> $msrfdConfigFile
+      echo "source ~/.python3-venv-default/bin/activate" >> "$msrfdConfigFile"
+      echo "" >> "$msrfdConfigFile"
     fi
     echo -e "${green}Done!${nc}\n\n"
   fi
@@ -320,11 +320,11 @@ Tridentctl () {
     echo -e "###################################\n# ${blue}Tridentctl${nc}\n###################################\n"
     read -p "Do you want to autocomplete tridentctl commands? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
-      echo "##  Tridentctl" >> $msrfdConfigFile
-      echo "source <(tridentctl completion zsh); compdef _tridentctl tridentctl" >> $msrfdConfigFile
-      echo "compdef __start_tridentctl astra" >> $msrfdConfigFile
-      echo "alias astra=\"tridentctl -n trident\"" >> $msrfdConfigFile
-      echo "" >> $msrfdConfigFile
+      echo "##  Tridentctl" >> "$msrfdConfigFile"
+      echo "source <(tridentctl completion zsh); compdef _tridentctl tridentctl" >> "$msrfdConfigFile"
+      echo "compdef __start_tridentctl astra" >> "$msrfdConfigFile"
+      echo "alias astra=\"tridentctl -n trident\"" >> "$msrfdConfigFile"
+      echo "" >> "$msrfdConfigFile"
     fi
     echo -e "${green}Done!${nc}\n\n"
   fi
@@ -333,7 +333,7 @@ Tridentctl () {
 
 ZSH-Autosuggestions () {
 
-  if [ ! -d $ZSH_CUSTOM/plugins/zsh-autosuggestions ]; then
+  if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
     echo -e "###################################\n# ${blue}ZSH-Autosuggestions${nc}\n###################################\n"
     read -p "Do you want to install ZSH-Autosuggestions plugin? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
@@ -347,7 +347,7 @@ ZSH-Autosuggestions () {
 
 ZSH-Completions () {
 
-  if [ ! -d $ZSH_CUSTOM/plugins/zsh-completions ]; then
+  if [ ! -d "$ZSH_CUSTOM/plugins/zsh-completions" ]; then
     echo -e "###################################\n# ${blue}ZSH-Completions${nc}\n###################################\n"
     read -p "Do you want to install ZSH-Completions plugin? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
@@ -361,7 +361,7 @@ ZSH-Completions () {
 
 ZSH-Syntax-Highlighthing () {
 
-  if [ ! -d $ZSH_CUSTOM/plugins/zsh-syntax-highlighting ]; then
+  if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
     echo -e "###################################\n# ${blue}ZSH-Syntax-Highlighthing${nc}\n###################################\n"
     read -p "Do you want to install ZSH-Syntax-Highlighthing plugin? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
@@ -399,13 +399,13 @@ Check_Dependencies () {
 
   # Checking 'curl' binary.
   checkBin=$(which curl | wc -l)
-  if [ $checkBin -eq 0 ]; then
+  if [ "$checkBin" -eq 0 ]; then
 
     echo "Trying to install curl..."
     $pkgManager curl
 
     checkBin=$(which curl | wc -l)
-    if [ $checkBin -eq 0 ]; then
+    if [ "$checkBin" -eq 0 ]; then
       errors=$errors"[curl] Not curl binary found. Please install it manually and try again.\n"
       Catch
     fi
@@ -413,7 +413,7 @@ Check_Dependencies () {
 
   # Checking 'git' binary.
   checkBin=$(which git | wc -l)
-  if [ $checkBin -eq 0 ]; then
+  if [ "$checkBin" -eq 0 ]; then
 
     echo "Trying to install git..."
     $pkgManager git
@@ -427,7 +427,7 @@ Check_Dependencies () {
 
   # Checking 'zsh' binary.
   checkBin=$(which zsh | wc -l)
-  if [ $checkBin -eq 0 ]; then
+  if [ "$checkBin" -eq 0 ]; then
 
     echo "Trying to install zsh..."
     $pkgManager zsh
@@ -438,7 +438,7 @@ Check_Dependencies () {
     fi    
 
     checkBin=$(which zsh | wc -l)
-    if [ $checkBin -eq 0 ]; then
+    if [ "$checkBin" -eq 0 ]; then
       errors=$errors"[zsh] Not zsh binary found. Please install it manually and try again.\n"
       Catch
     fi
@@ -446,12 +446,12 @@ Check_Dependencies () {
 
   # Checking 'oh-my-zsh' directory.
   checkDir=$execUser_Home/.oh-my-zsh
-  if [ ! -d $checkDir ]; then
+  if [ ! -d "$checkDir" ]; then
 
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
     ZSH_CUSTOM=$execUser_Home'/.oh-my-zsh/custom'
 
-    if [ ! -d $checkDir ]; then
+    if [ ! -d "$checkDir" ]; then
       errors=$errors"[oh-my-zsh] Not zsh binary found. Please install it manually and try again.\n"
       Catch
     fi
