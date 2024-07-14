@@ -1,7 +1,7 @@
 #!/bin/bash
 ###############################################################################
 ##        Name: myshell_rfd.sh                                                #
-##        Date: 13/07/2024                                                    #
+##        Date: 14/07/2024                                                    #
 ## Description: Custom configuration for ZSH.                                 #
 ##----------------------------------------------------------------------------#
 ##      Editor: José Manuel Plana Santos                                      #
@@ -12,7 +12,7 @@
 
 # Script information.
 scriptName="MyShell_RFD"
-scriptVersion="v1.3"
+scriptVersion="v1.4"
 
 # Script directories.
 scriptPath=$(cd $(dirname $0) ; pwd -P)/
@@ -302,11 +302,7 @@ Python () {
     read -p "Do you want to create Python virtual enviroment? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
       echo "##  Python3" >> $msrfdConfigFile
-      if [ ! -d "$execUser_Home/.python3-venv-default" ]; then
-        python3 -m venv $execUser_Home/.python3-venv-default
-        mkdir -p $execUser_Home/.python3-venv-default
-      fi
-      echo "source $execUser_Home/.python3-venv-default/bin/activate" >> $msrfdConfigFile
+      echo "source $execUser_Home/.py-venv-default/bin/activate" >> $msrfdConfigFile
       echo "" >> $msrfdConfigFile
     fi
     echo -e "${green}Done!${nc}\n\n"
