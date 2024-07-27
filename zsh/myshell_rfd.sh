@@ -1,7 +1,7 @@
 #!/bin/bash
 ###############################################################################
 ##        Name: myshell_rfd.sh                                                #
-##        Date: 14/07/2024                                                    #
+##        Date: 27/07/2024                                                    #
 ## Description: Custom configuration for ZSH.                                 #
 ##----------------------------------------------------------------------------#
 ##      Editor: José Manuel Plana Santos                                      #
@@ -12,7 +12,7 @@
 
 # Script information.
 scriptName="MyShell_RFD"
-scriptVersion="v1.4"
+scriptVersion="v1.5"
 
 # Script directories.
 scriptPath=$(cd $(dirname $0) ; pwd -P)/
@@ -93,9 +93,13 @@ Main () {
 
   OC
 
+  OpenTofu
+
   PowerLevel10K
   
   Python
+
+  Terraform
 
   Tridentctl
 
@@ -269,6 +273,21 @@ OC () {
   fi
 }
 
+OpenTofu () {
+
+  if [ $(which opentofu 2>/dev/null | wc -l) -eq 1 ]; then
+    echo -e "###################################\n# ${blue}OpenTofu${nc}\n###################################\n"
+    read -p "Do you want to autocomplete opentofu commands? [y/n]: " selectedOption
+    if [ "$selectedOption" == "y" ]; then
+      echo "##  OpenTofu" >> $msrfdConfigFile
+      echo "complete -o nospace -C /usr/bin/opentofu opentofu" >> $msrfdConfigFile
+      echo "alias ot=\"opentofu\"" >> $msrfdConfigFile
+      echo "" >> $msrfdConfigFile
+    fi
+    echo -e "${green}Done!${nc}\n\n"
+  fi
+}
+
 
 PowerLevel10K () {
 
@@ -303,6 +322,23 @@ Python () {
     if [ "$selectedOption" == "y" ]; then
       echo "##  Python3" >> $msrfdConfigFile
       echo "source $execUser_Home/.py-venv-default/bin/activate" >> $msrfdConfigFile
+      echo "" >> $msrfdConfigFile
+    fi
+    echo -e "${green}Done!${nc}\n\n"
+  fi
+}
+
+
+Terraform () {
+
+  if [ $(which terraform 2>/dev/null | wc -l) -eq 1 ]; then
+    echo -e "###################################\n# ${blue}Terraform${nc}\n###################################\n"
+    read -p "Do you want to autocomplete terraform commands? [y/n]: " selectedOption
+    if [ "$selectedOption" == "y" ]; then
+      echo "##  Terraform" >> $msrfdConfigFile
+      echo "autoload -U +X bashcompinit && bashcompinit" >> $msrfdConfigFile
+      echo "complete -o nospace -C /usr/bin/terraform terraform" >> $msrfdConfigFile
+      echo "alias t=\"terraform\"" >> $msrfdConfigFile
       echo "" >> $msrfdConfigFile
     fi
     echo -e "${green}Done!${nc}\n\n"
