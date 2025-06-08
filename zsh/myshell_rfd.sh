@@ -79,6 +79,10 @@ Main () {
 
   AWS
 
+  Bat
+
+  CD
+
   Docker
 
   FZF
@@ -94,6 +98,8 @@ Main () {
   OC
 
   OpenTofu
+
+  PLS
 
   PowerLevel10K
   
@@ -134,6 +140,33 @@ AWS () {
       echo "##  AWS" >> $msrfdConfigFile
       echo "complete -C '/usr/local/bin/aws_completer' aws" >> $msrfdConfigFile
       echo "" >> $msrfdConfigFile
+    fi
+    echo -e "${green}Done!${nc}\n\n"
+  fi
+}
+
+Bat () {
+
+  if [ $(which bat 2>/dev/null | wc -l) -eq 1 ]; then
+    echo -e "###################################\n# ${blue}Bat${nc}\n###################################\n"
+    read -p "Do you want to replace cat command for bat command? [y/n]: " selectedOption
+    if [ "$selectedOption" == "y" ]; then
+      echo "##  Bat" >> $msrfdConfigFile
+      echo "alias cat='bat'" >> $msrfdConfigFile
+    fi
+    echo -e "${green}Done!${nc}\n\n"
+  fi
+}
+
+CD () {
+
+  if [ $(which cd 2>/dev/null | wc -l) -eq 1 ]; then
+    echo -e "###################################\n# ${blue}CD${nc}\n###################################\n"
+    read -p "Do you want to add cd alias? [y/n]: " selectedOption
+    if [ "$selectedOption" == "y" ]; then
+      echo "##  CD" >> $msrfdConfigFile
+      echo "alias ..='cd ..'" >> $msrfdConfigFile
+      echo "alias --='cd -'" >> $msrfdConfigFile
     fi
     echo -e "${green}Done!${nc}\n\n"
   fi
@@ -197,7 +230,7 @@ K () {
       git clone https://github.com/supercrabtree/k $ZSH_CUSTOM/plugins/k; sed -i 's/^k[[:space:]]/z /g' $ZSH_CUSTOM/plugins/k/k.sh
       plugins=$plugins" k"
       echo "##  K" >> $msrfdConfigFile
-      echo "alias f=\"z -ha\"" >> $msrfdConfigFile
+      echo "alias f='z -ha'" >> $msrfdConfigFile
       echo "" >> $msrfdConfigFile
     fi
     echo -e "${green}Done!${nc}\n\n"
@@ -216,27 +249,27 @@ Kubectl () {
       echo "compdef __start_kubectl k" >> $msrfdConfigFile
       echo "alias k=kubectl" >> $msrfdConfigFile
       echo "compdef __start_kubectl ka" >> $msrfdConfigFile
-      echo "alias ka=\"kubectl apply -f\"" >> $msrfdConfigFile
+      echo "alias ka='kubectl apply -f'" >> $msrfdConfigFile
       echo "compdef __start_kubectl kc" >> $msrfdConfigFile
-      echo "alias kc=\"kubectl create\"" >> $msrfdConfigFile
+      echo "alias kc='kubectl create'" >> $msrfdConfigFile
       echo "compdef __start_kubectl kd" >> $msrfdConfigFile
-      echo "alias kd=\"kubectl describe\"" >> $msrfdConfigFile
+      echo "alias kd='kubectl describe'" >> $msrfdConfigFile
       echo "compdef __start_kubectl kdc" >> $msrfdConfigFile
-      echo "alias kdc=\"kubectl config delete-context\"" >> $msrfdConfigFile
+      echo "alias kdc='kubectl config delete-context'" >> $msrfdConfigFile
       echo "compdef __start_kubectl ke" >> $msrfdConfigFile
-      echo "alias ke=\"kubectl exec -ti\"" >> $msrfdConfigFile
+      echo "alias ke='kubectl exec -ti'" >> $msrfdConfigFile
       echo "compdef __start_kubectl kg" >> $msrfdConfigFile
-      echo "alias kg=\"kubectl get\"" >> $msrfdConfigFile
+      echo "alias kg='kubectl get'" >> $msrfdConfigFile
       echo "compdef __start_kubectl kgj" >> $msrfdConfigFile
-      echo "alias kgj=\"kubectl get -o json\"" >> $msrfdConfigFile
+      echo "alias kgj='kubectl get -o json'" >> $msrfdConfigFile
       echo "compdef __start_kubectl kgy" >> $msrfdConfigFile
-      echo "alias kgy=\"kubectl get -o yaml\"" >> $msrfdConfigFile
+      echo "alias kgy='kubectl get -o yaml'" >> $msrfdConfigFile
       echo "compdef __start_kubectl kl" >> $msrfdConfigFile
-      echo "alias kl=\"kubectl logs\"" >> $msrfdConfigFile
+      echo "alias kl='kubectl logs'" >> $msrfdConfigFile
       echo "compdef __start_kubectl kn" >> $msrfdConfigFile
-      echo "alias kn=\"kubectl config set-context --current --namespace\"" >> $msrfdConfigFile
+      echo "alias kn='kubectl config set-context --current --namespace'" >> $msrfdConfigFile
       echo "compdef __start_kubectl ku" >> $msrfdConfigFile
-      echo "alias ku=\"kubectl config use-context\"" >> $msrfdConfigFile
+      echo "alias ku='kubectl config use-context'" >> $msrfdConfigFile
       echo "" >> $msrfdConfigFile
     fi
     echo -e "${green}Done!${nc}\n\n"
@@ -281,8 +314,22 @@ OpenTofu () {
     if [ "$selectedOption" == "y" ]; then
       echo "##  OpenTofu" >> $msrfdConfigFile
       echo "complete -o nospace -C /usr/bin/opentofu opentofu" >> $msrfdConfigFile
-      echo "alias ot=\"opentofu\"" >> $msrfdConfigFile
+      echo "alias ot='opentofu'" >> $msrfdConfigFile
       echo "" >> $msrfdConfigFile
+    fi
+    echo -e "${green}Done!${nc}\n\n"
+  fi
+}
+
+
+PLS () {
+
+  if [ $(which sudo 2>/dev/null | wc -l) -eq 1 ]; then
+    echo -e "###################################\n# ${blue}PLS${nc}\n###################################\n"
+    read -p "Do you want to add pls alias? [y/n]: " selectedOption
+    if [ "$selectedOption" == "y" ]; then
+      echo "##  PLS" >> $msrfdConfigFile
+      echo "alias pls='sudo !!'" >> $msrfdConfigFile
     fi
     echo -e "${green}Done!${nc}\n\n"
   fi
@@ -304,7 +351,7 @@ PowerLevel10K () {
         cp $srcPath/p10k.zsh $execUser_Home/.p10k.zsh
         sed -i '/^ZSH_THEME=/i# The ZSH_THEME was modified by MyShell_RFD' $execUser_Home/.zshrc
         sed -i '/^ZSH_THEME=/ s/^/# /' $execUser_Home/.zshrc
-        sed -i '/^# ZSH_THEME=/ a ZSH_THEME=\"powerlevel10k/powerlevel10k\"' $execUser_Home/.zshrc
+        sed -i '/^# ZSH_THEME=/ a ZSH_THEME='powerlevel10k/powerlevel10k'' $execUser_Home/.zshrc
         echo "##  PowerLevel10K" >> $msrfdConfigFile
         echo -e "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh\n" >> $msrfdConfigFile
       fi
@@ -338,7 +385,7 @@ Terraform () {
       echo "##  Terraform" >> $msrfdConfigFile
       echo "autoload -U +X bashcompinit && bashcompinit" >> $msrfdConfigFile
       echo "complete -o nospace -C /usr/bin/terraform terraform" >> $msrfdConfigFile
-      echo "alias t=\"terraform\"" >> $msrfdConfigFile
+      echo "alias t='terraform'" >> $msrfdConfigFile
       echo "" >> $msrfdConfigFile
     fi
     echo -e "${green}Done!${nc}\n\n"
@@ -355,7 +402,7 @@ Tridentctl () {
       echo "##  Tridentctl" >> $msrfdConfigFile
       echo "source <(tridentctl completion zsh); compdef _tridentctl tridentctl" >> $msrfdConfigFile
       echo "compdef __start_tridentctl astra" >> $msrfdConfigFile
-      echo "alias astra=\"tridentctl -n trident\"" >> $msrfdConfigFile
+      echo "alias astra='tridentctl -n trident'" >> $msrfdConfigFile
       echo "" >> $msrfdConfigFile
     fi
     echo -e "${green}Done!${nc}\n\n"
