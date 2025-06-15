@@ -1,8 +1,9 @@
 #!/bin/bash
 ###############################################################################
-##        Name: myshell_rfd.sh                                                #
-##        Date: 27/07/2024                                                    #
-## Description: Custom configuration for ZSH.                                 #
+##        Name: MyShell_RFD                                                   #
+##        Date: 15/06/2025                                                    #
+## Description: Custom configuration for ZSH.                                 # 
+##     Version: v1.6.0                                                        #
 ##----------------------------------------------------------------------------#
 ##      Editor: José Manuel Plana Santos                                      #
 ##     Contact: dev.josemanuelps@gmail.com                                    #
@@ -10,9 +11,13 @@
 
 
 
+###############################################################################
+## Configs ####################################################################
+###############################################################################
+
 # Script information.
 scriptName="MyShell_RFD"
-scriptVersion="v1.5"
+scriptVersion="v1.6.0"
 
 # Script directories.
 scriptPath=$(cd $(dirname $0) ; pwd -P)/
@@ -47,7 +52,7 @@ execUser_Home=$(getent passwd $execUser | cut -d: -f6)
 
 
 ###############################################################################
-## Main code. #################################################################
+## Main code ##################################################################
 ###############################################################################
 
 Main () {
@@ -131,6 +136,11 @@ Main () {
 }
 
 
+
+###############################################################################
+## Methods ####################################################################
+###############################################################################
+
 AWS () {
 
   if [ $(which aws 2>/dev/null | wc -l) -eq 1 ]; then
@@ -159,17 +169,27 @@ Bat () {
 }
 
 CD () {
-
-  if [ $(which cd 2>/dev/null | wc -l) -eq 1 ]; then
-    echo -e "###################################\n# ${blue}CD${nc}\n###################################\n"
-    read -p "Do you want to add cd alias? [y/n]: " selectedOption
-    if [ "$selectedOption" == "y" ]; then
-      echo "##  CD" >> $msrfdConfigFile
-      echo "alias ..='cd ..'" >> $msrfdConfigFile
-      echo "alias --='cd -'" >> $msrfdConfigFile
-    fi
-    echo -e "${green}Done!${nc}\n\n"
+  echo -e "###################################\n# ${blue}CD${nc}\n###################################\n"
+  read -p "Do you want to add cd alias? [y/n]: " selectedOption
+  if [ "$selectedOption" == "y" ]; then
+    echo "##  CD" >> $msrfdConfigFile    # Define the function to navigate up N directories
+    echo 'function ..() {' >> $msrfdConfigFile
+    echo '  local count=${1:-1}  # Default to 1 if no number is specified' >> $msrfdConfigFile
+    echo '  local path=""' >> $msrfdConfigFile
+    echo '  # Input validation' >> $msrfdConfigFile
+    echo '  if ! [[ "$count" =~ ^[0-9]+$ ]]; then' >> $msrfdConfigFile
+    echo '    echo "Error: Argument must be a positive integer" >&2' >> $msrfdConfigFile
+    echo '    return 1' >> $msrfdConfigFile
+    echo '  fi' >> $msrfdConfigFile
+    echo '  # Build the path with the requested number of ".."' >> $msrfdConfigFile
+    echo '  for ((i=0; i<count; i++)); do' >> $msrfdConfigFile
+    echo '    path="../$path"' >> $msrfdConfigFile
+    echo '  done' >> $msrfdConfigFile
+    echo '  # Change to the target directory' >> $msrfdConfigFile
+    echo '  cd "$path" 2>/dev/null || { echo "Error: Cannot navigate up $count directories" >&2; return 1; }' >> $msrfdConfigFile
+    echo '}' >> $msrfdConfigFile
   fi
+  echo -e "${green}Done!${nc}\n\n"
 }
 
 
@@ -329,7 +349,8 @@ PLS () {
     read -p "Do you want to add pls alias? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
       echo "##  PLS" >> $msrfdConfigFile
-      echo "alias pls='sudo !!'" >> $msrfdConfigFile
+      echo "function pls() { sudo \$(fc -ln -1) }" >> $msrfdConfigFile
+      echo "" >> $msrfdConfigFile
     fi
     echo -e "${green}Done!${nc}\n\n"
   fi
