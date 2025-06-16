@@ -3,7 +3,7 @@
 ##        Name: MyShell_RFD                                                   #
 ##        Date: 15/06/2025                                                    #
 ## Description: Custom configuration for ZSH.                                 # 
-##     Version: v1.6.0                                                        #
+##     Version: v1.7.0                                                        #
 ##----------------------------------------------------------------------------#
 ##      Editor: José Manuel Plana Santos                                      #
 ##     Contact: dev.josemanuelps@gmail.com                                    #
@@ -17,7 +17,7 @@
 
 # Script information.
 scriptName="MyShell_RFD"
-scriptVersion="v1.6.0"
+scriptVersion="v1.7.0"
 
 # Script directories.
 scriptPath=$(cd $(dirname $0) ; pwd -P)/
@@ -105,6 +105,8 @@ Main () {
   OpenTofu
 
   PLS
+
+  Podman
 
   PowerLevel10K
   
@@ -258,6 +260,7 @@ K () {
 }
 
 
+
 Kubectl () {
 
   if [ $(which kubectl 2>/dev/null | wc -l) -eq 1 ]; then
@@ -290,6 +293,20 @@ Kubectl () {
       echo "alias kn='kubectl config set-context --current --namespace'" >> $msrfdConfigFile
       echo "compdef __start_kubectl ku" >> $msrfdConfigFile
       echo "alias ku='kubectl config use-context'" >> $msrfdConfigFile
+      read -p "Do you want to install Krew? [y/n]: " selectedOption
+      if [ "$selectedOption" == "y" ]; then
+        cd "$(mktemp -d)"
+        OS="$(uname | tr '[:upper:]' '[:lower:]')"
+        ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')"
+        KREW="krew-${OS}_${ARCH}"
+        curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz"
+        tar zxvf "${KREW}.tar.gz"
+        ./"${KREW}" install krew
+        export PATH="${KREW_ROOT:-$execUser_Home/.krew}/bin:$PATH"
+        kubectl krew install ai
+        kubectl krew install ns
+        echo "export PATH=\"${KREW_ROOT:-$execUser_Home/.krew}/bin:\$PATH\"" >> $msrfdConfigFile
+      fi
       echo "" >> $msrfdConfigFile
     fi
     echo -e "${green}Done!${nc}\n\n"
@@ -350,6 +367,21 @@ PLS () {
     if [ "$selectedOption" == "y" ]; then
       echo "##  PLS" >> $msrfdConfigFile
       echo "function pls() { sudo \$(fc -ln -1) }" >> $msrfdConfigFile
+      echo "" >> $msrfdConfigFile
+    fi
+    echo -e "${green}Done!${nc}\n\n"
+  fi
+}
+
+Podman () {
+
+  if [ $(which podman 2>/dev/null | wc -l) -eq 1 ]; then
+    echo -e "###################################\n# ${blue}Podman${nc}\n###################################\n"
+    read -p "Do you want to autocomplete podman commands? [y/n]: " selectedOption
+    if [ "$selectedOption" == "y" ]; then
+      echo "##  Podman" >> $msrfdConfigFile
+      echo "source <(podman completion zsh); compdef _podman podman" >> $msrfdConfigFile
+      echo "alias docker=podman" >> $msrfdConfigFile
       echo "" >> $msrfdConfigFile
     fi
     echo -e "${green}Done!${nc}\n\n"
