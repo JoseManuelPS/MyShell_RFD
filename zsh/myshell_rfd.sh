@@ -1,9 +1,9 @@
 #!/bin/bash
 ###############################################################################
 ##        Name: MyShell_RFD                                                   #
-##        Date: 15/06/2025                                                    #
+##        Date: 24/08/2025                                                    #
 ## Description: Custom configuration for ZSH.                                 # 
-##     Version: v1.7.0                                                        #
+##     Version: v1.8.0                                                        #
 ##----------------------------------------------------------------------------#
 ##      Editor: José Manuel Plana Santos                                      #
 ##     Contact: dev.josemanuelps@gmail.com                                    #
@@ -99,6 +99,8 @@ Main () {
   Kubectl
 
   Minikube
+
+  NVM
 
   OC
 
@@ -323,6 +325,23 @@ Minikube () {
       echo "##  Minikube" >> $msrfdConfigFile
       echo "source <(minikube completion zsh)" >> $msrfdConfigFile
       echo "" >> $msrfdConfigFile
+    fi
+    echo -e "${green}Done!${nc}\n\n"
+  fi
+}
+
+
+NVM () {
+  if [ -d "$HOME/.nvm" ]; then
+    echo -e "###################################\n# ${blue}NVM${nc}\n###################################\n"
+    read -p "Do you want to configure NVM? [y/n]: " selectedOption
+    if [ "$selectedOption" == "y" ]; then
+      echo "##  NVM" >> "$msrfdConfigFile"
+      echo 'export NVM_DIR="$HOME/.nvm"' >> "$msrfdConfigFile"
+      echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm' >> "$msrfdConfigFile"
+      echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion' >> "$msrfdConfigFile"
+      echo '. "$HOME/.local/bin/env"' >> "$msrfdConfigFile"
+      echo '' >> "$msrfdConfigFile"
     fi
     echo -e "${green}Done!${nc}\n\n"
   fi
