@@ -1,9 +1,9 @@
 #!/bin/bash
 ###############################################################################
 ##        Name: MyShell_RFD                                                   #
-##        Date: 24/08/2025                                                    #
-## Description: Custom configuration for ZSH.                                 # 
-##     Version: v1.8.0                                                        #
+##        Date: 04/01/2025                                                    #
+## Description: Custom configuration for ZSH.                                 #
+##     Version: v1.8.1                                                        #
 ##----------------------------------------------------------------------------#
 ##      Editor: José Manuel Plana Santos                                      #
 ##     Contact: dev.josemanuelps@gmail.com                                    #
@@ -17,7 +17,7 @@
 
 # Script information.
 scriptName="MyShell_RFD"
-scriptVersion="v1.7.0"
+scriptVersion="v1.8.1"
 
 # Script directories.
 scriptPath=$(cd $(dirname $0) ; pwd -P)/
@@ -111,7 +111,7 @@ Main () {
   Podman
 
   PowerLevel10K
-  
+
   Python
 
   Terraform
@@ -340,7 +340,9 @@ NVM () {
       echo 'export NVM_DIR="$HOME/.nvm"' >> "$msrfdConfigFile"
       echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm' >> "$msrfdConfigFile"
       echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion' >> "$msrfdConfigFile"
-      echo '. "$HOME/.local/bin/env"' >> "$msrfdConfigFile"
+      echo 'if [ -d "$HOME/.local/bin" ]; then' >> "$msrfdConfigFile"
+      echo '  . "$HOME/.local/bin/env"' >> "$msrfdConfigFile"
+      echo 'fi' >> "$msrfdConfigFile"
       echo '' >> "$msrfdConfigFile"
     fi
     echo -e "${green}Done!${nc}\n\n"
@@ -586,7 +588,7 @@ Check_Dependencies () {
     read -p "Do you want to setup zsh as default shell? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
       chsh -s $(which zsh)
-    fi    
+    fi
 
     checkBin=$(which zsh 2>/dev/null | wc -l)
     if [ $checkBin -eq 0 ]; then
@@ -620,5 +622,3 @@ Check_Dependencies () {
 
 # Script execution start.
 Main
-
-
