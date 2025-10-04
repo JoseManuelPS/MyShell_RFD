@@ -3,7 +3,7 @@
 ##        Name: MyShell_RFD                                                   #
 ##        Date: 04/01/2025                                                    #
 ## Description: Custom configuration for ZSH.                                 #
-##     Version: v1.8.1                                                        #
+##     Version: v1.8.2                                                        #
 ##----------------------------------------------------------------------------#
 ##      Editor: José Manuel Plana Santos                                      #
 ##     Contact: dev.josemanuelps@gmail.com                                    #
@@ -17,7 +17,7 @@
 
 # Script information.
 scriptName="MyShell_RFD"
-scriptVersion="v1.8.1"
+scriptVersion="v1.8.2"
 
 # Script directories.
 scriptPath=$(cd $(dirname $0) ; pwd -P)/
@@ -84,7 +84,7 @@ Main () {
 
   AWS
 
-  Bat
+  BatCat
 
   CD
 
@@ -159,14 +159,14 @@ AWS () {
   fi
 }
 
-Bat () {
+BatCat () {
 
-  if [ $(which bat 2>/dev/null | wc -l) -eq 1 ]; then
-    echo -e "###################################\n# ${blue}Bat${nc}\n###################################\n"
-    read -p "Do you want to replace cat command for bat command? [y/n]: " selectedOption
+  if [ $(which batcat 2>/dev/null | wc -l) -eq 1 ]; then
+    echo -e "###################################\n# ${blue}BatCat${nc}\n###################################\n"
+    read -p "Do you want to replace cat command for batcat command? [y/n]: " selectedOption
     if [ "$selectedOption" == "y" ]; then
-      echo "##  Bat" >> $msrfdConfigFile
-      echo "alias cat='bat'" >> $msrfdConfigFile
+      echo "##  BatCat" >> $msrfdConfigFile
+      echo "alias cat='batcat'" >> $msrfdConfigFile
     fi
     echo -e "${green}Done!${nc}\n\n"
   fi
@@ -192,6 +192,7 @@ CD () {
     echo '  # Change to the target directory' >> $msrfdConfigFile
     echo '  cd "$path" 2>/dev/null || { echo "Error: Cannot navigate up $count directories" >&2; return 1; }' >> $msrfdConfigFile
     echo '}' >> $msrfdConfigFile
+    echo ''
   fi
   echo -e "${green}Done!${nc}\n\n"
 }
