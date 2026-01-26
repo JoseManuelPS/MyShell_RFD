@@ -1,0 +1,4 @@
+dist/
+tests/libs/
+*.swp
+.DS_Store
