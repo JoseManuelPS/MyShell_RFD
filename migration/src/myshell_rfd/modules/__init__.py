@@ -1,0 +1,69 @@
+"""MyShell_RFD modules.
+
+This package contains all built-in modules for tool configuration.
+Each module is a class that extends BaseModule or one of its variants.
+"""
+
+# Import all modules to trigger registration
+from myshell_rfd.modules.aws import AWSModule
+from myshell_rfd.modules.cloud import OpenTofuModule, TerraformModule
+from myshell_rfd.modules.containers import DockerModule, PodmanModule
+from myshell_rfd.modules.kubernetes import (
+    EksctlModule,
+    HelmModule,
+    KubectlModule,
+    MinikubeModule,
+    OCModule,
+    RosaModule,
+    TridentctlModule,
+)
+from myshell_rfd.modules.shell_plugins import (
+    ZshAutocompletionsModule,
+    ZshAutosuggestionsModule,
+    ZshSyntaxHighlightingModule,
+)
+from myshell_rfd.modules.themes import PowerLevel10KModule
+from myshell_rfd.modules.tools import (
+    BatcatModule,
+    FZFModule,
+    KPluginModule,
+    NVMModule,
+    PLSModule,
+    PythonVenvModule,
+)
+from myshell_rfd.modules.vcs import GitHubModule, GitLabModule
+
+__all__ = [
+    # AWS
+    "AWSModule",
+    # Containers
+    "DockerModule",
+    "PodmanModule",
+    # Kubernetes
+    "KubectlModule",
+    "HelmModule",
+    "MinikubeModule",
+    "EksctlModule",
+    "OCModule",
+    "RosaModule",
+    "TridentctlModule",
+    # Cloud
+    "TerraformModule",
+    "OpenTofuModule",
+    # Tools
+    "FZFModule",
+    "BatcatModule",
+    "PLSModule",
+    "PythonVenvModule",
+    "NVMModule",
+    "KPluginModule",
+    # VCS
+    "GitHubModule",
+    "GitLabModule",
+    # Shell plugins
+    "ZshAutosuggestionsModule",
+    "ZshAutocompletionsModule",
+    "ZshSyntaxHighlightingModule",
+    # Themes
+    "PowerLevel10KModule",
+]
