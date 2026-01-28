@@ -4,7 +4,19 @@
 main() {
     clear
     
-    # Parse CLI Arguments
+    # Parse CLI Arguments for modifiers first
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            a|all)
+                AUTO_YES=true
+                shift
+                ;;
+            *)
+                break
+                ;;
+        esac
+    done
+    
     local command="$1"
     local arg="$2"
 
@@ -22,6 +34,7 @@ main() {
             ;;
         i|install)
             init_config
+            ensure_zshrc_source
             # Bootstrap checks
             check_and_install_essentials
             
@@ -64,7 +77,10 @@ main() {
 }
 
 show_help() {
-    echo "Usage: myshell_rfd [command] [args]"
+    echo "Usage: myshell_rfd [modifiers] [command] [args]"
+    echo ""
+    echo "Modifiers:"
+    echo "  a, all          Auto-accept all prompts (non-interactive mode)."
     echo ""
     echo "Commands:"
     echo "  (no args)       Run interactive configuration for all modules."
@@ -142,6 +158,15 @@ run_all_modules() {
 print_footer() {
     print_header "Execution Complete"
     lecho "SUCCESS" "MyShell_RFD has finished."
+    
+    if [[ "$AUTO_YES" == "true" ]]; then
+        echo ""
+        lecho "WARN" "Non-interactive mode was used. ZSH was NOT set as default shell automatically."
+        echo "To set ZSH as your default shell, please run:"
+        echo -e "  ${BOLD}chsh -s \$(which zsh)${RESET}"
+        echo ""
+    fi
+    
     lecho "INFO" "Please restart your shell or run 'source ~/.zshrc' to apply changes."
 }
 

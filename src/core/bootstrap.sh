@@ -48,8 +48,13 @@ check_and_install_essentials() {
         lecho "WARN" "zsh not found."
         if [[ -n "$pkg_cmd" ]] && prompt_yes_no "Install zsh?" "y"; then
             $pkg_cmd zsh
-            if check_binary zsh && prompt_yes_no "Make zsh default shell?" "y"; then
-                chsh -s "$(which zsh)"
+            if check_binary zsh; then
+                # Skip chsh in non-interactive mode because it usually requires a password/interaction
+                if [[ "$AUTO_YES" == "true" ]]; then
+                    lecho "WARN" "Skipping 'chsh' in non-interactive mode."
+                elif prompt_yes_no "Make zsh default shell?" "y"; then
+                    chsh -s "$(which zsh)"
+                fi
             fi
         else
             missing_deps=1

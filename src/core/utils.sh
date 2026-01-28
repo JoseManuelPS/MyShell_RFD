@@ -2,6 +2,9 @@
 # Core: Utils
 # General utility functions.
 
+# Global flag for non-interactive mode
+AUTO_YES=false
+
 SCRIPT_ROOT_DIR="$HOME/.myshell_rfd"
 SCRIPT_CONFIG_FILE="$SCRIPT_ROOT_DIR/config"
 SCRIPT_BACKUP_DIR="$SCRIPT_ROOT_DIR/backups"
@@ -94,11 +97,16 @@ enable_omz_plugin() {
         return
     fi
 
-    if grep -q "plugins=(" "$zshrc"; then
-         if ! grep -q "$plugin" "$zshrc"; then
-             lecho "INFO" "Enabling plugin '$plugin' in .zshrc..."
-             local current_plugins=$(grep '^plugins=(' "$zshrc" | sed 's/plugins=(//g' | sed 's/)//g')
-             sed -i "/^plugins=/c plugins=($current_plugins $plugin)" "$zshrc"
-         fi
+    # Check if plugins=( line exists
+    if grep -q "^plugins=(" "$zshrc"; then
+        # Check if this specific plugin is already in the array
+        # Use word boundaries to avoid false matches (e.g., 'z' in 'fzf')
+        if ! grep "^plugins=(" "$zshrc" | grep -qE "(^|[[:space:]])$plugin([[:space:]]|$)"; then
+            lecho "INFO" "Enabling plugin '$plugin' in .zshrc..."
+            # Extract current plugins and add new one
+            local current_plugins=$(grep '^plugins=(' "$zshrc" | sed 's/plugins=(//g' | sed 's/)//g')
+            sed -i "/^plugins=/c plugins=($current_plugins $plugin)" "$zshrc"
+        fi
     fi
 }
+

@@ -1,5 +1,6 @@
 
-# Module: K (Z Plugin)
+# Module: K (Powerful LS, patched as 'z')
+# Installs supercrabtree/k and patches it to respond to 'z' command.
 
 MODULES["K_Plugin"]="configure_k_plugin"
 
@@ -8,28 +9,25 @@ configure_k_plugin() {
     local k_plugin_dir="$zsh_custom/plugins/k"
 
     if [[ ! -d "$k_plugin_dir" ]]; then
-        print_header "K (Z) Plugin"
+        print_header "K Plugin (Powerful LS as 'z')"
         
-        if prompt_yes_no "Install 'k' (z - jump around) plugin?" "y"; then
+        if prompt_yes_no "Install 'k' plugin (accessible via 'z' command)?" "y"; then
             lecho "INFO" "Cloning k plugin..."
             git clone https://github.com/supercrabtree/k "$k_plugin_dir"
             
-            # Patch k to work as z
-            sed -i 's/^k[[:space:]]/z /g' "$k_plugin_dir/k.sh"
+            # Professionally patch k to work as z
+            lecho "INFO" "Patching k to respond to 'z' command..."
+            # Using a more robust sed that handles potential spacing variations
+            sed -i 's/^k\s*() {/z () {/g' "$k_plugin_dir/k.sh"
             
-            # We don't need to add it to 'plugins=' array here because we handle that in a separate ZSH config step usually,
-            # but the original script added it to a local 'plugins' variable.
-            # We will handle plugin activation centrally or here.
+            # Add to our local config (self-contained)
+            # This avoids touching the global .zshrc plugins list
+            # We source the script directly and set the alias
+            add_to_config "K" "[ -f \"$k_plugin_dir/k.sh\" ] && source \"$k_plugin_dir/k.sh\"
+alias f='z -ha'"
             
-            add_to_config "K" "alias f='z -ha'"
-            
-            # Mark for activation
-            # Ideally, we should have a function to enable OMZ plugins.
-            enable_omz_plugin "k"
-            
-            lecho "SUCCESS" "K plugin installed."
+            lecho "SUCCESS" "K Plugin installed successfully."
+            lecho "INFO" "Commands: 'z' for powerful ls, 'f' for 'z -ha'"
         fi
     fi
 }
-
-

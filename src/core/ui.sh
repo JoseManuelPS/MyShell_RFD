@@ -24,6 +24,16 @@ prompt_yes_no() {
         prompt_text="[y/N]"
     fi
 
+    # Auto-accept in non-interactive mode
+    if [[ "$AUTO_YES" == "true" ]]; then
+        echo -e "${BOLD}${question} ${prompt_text}: ${RESET}${default} ${DIM}(auto)${RESET}"
+        if [[ "$default" == "y" ]]; then
+            return 0
+        else
+            return 1
+        fi
+    fi
+
     echo -ne "${BOLD}${question} ${prompt_text}: ${RESET}"
     read -r response
 

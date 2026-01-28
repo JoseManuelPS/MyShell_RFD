@@ -3,7 +3,7 @@
 
 SHELL := /bin/bash
 PROJECT_NAME := myshell_rfd-$(VERSION)
-VERSION := v1.0.0
+VERSION := v1.0.1
 BUILD_DIR := dist
 SRC_DIR := src
 TEST_DIR := tests
