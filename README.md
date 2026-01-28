@@ -1,6 +1,6 @@
 # MyShell_RFD
 
-![Version](https://img.shields.io/badge/version-v1.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-v1.0.1-blue.svg)
 ![Build](https://img.shields.io/badge/build-passing-green.svg)
 
 **MyShell_RFD** is a professional, modular configuration tool for ZSH and Bash environments.
