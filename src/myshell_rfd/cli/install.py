@@ -155,8 +155,6 @@ def detect() -> None:
         logger.success(f"Configured {len(configured)} modules:")
         for name in configured:
             logger.print(f"  - {name}")
-    else:
-        logger.warn("No new modules to configure")
 
 
 @app.command()
