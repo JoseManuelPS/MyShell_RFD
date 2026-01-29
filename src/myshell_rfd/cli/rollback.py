@@ -11,7 +11,10 @@ from rich.table import Table
 from myshell_rfd.cli import app, console
 
 # Create rollback sub-app
-rollback_app = typer.Typer(help="Manage configuration snapshots")
+rollback_app = typer.Typer(
+    help="Manage configuration snapshots",
+    context_settings={"help_option_names": ["-h", "--help"]},
+)
 app.add_typer(rollback_app, name="rollback")
 
 

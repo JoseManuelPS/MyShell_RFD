@@ -17,6 +17,7 @@ from myshell_rfd.modules.kubernetes import (
     RosaModule,
     TridentctlModule,
 )
+from myshell_rfd.modules.myshell import MyShellModule
 from myshell_rfd.modules.shell_plugins import (
     ZshAutocompletionsModule,
     ZshAutosuggestionsModule,
@@ -37,6 +38,8 @@ from myshell_rfd.modules.vcs import GitHubModule, GitLabModule
 # This list is used by the registry to discover modules without dynamic introspection.
 # When adding a new module, add it here AND import it above.
 BUILTIN_MODULES = [
+    # MyShell (self-configuration)
+    MyShellModule,
     # AWS
     AWSModule,
     # Containers
@@ -74,6 +77,8 @@ BUILTIN_MODULES = [
 __all__ = [
     # Module list
     "BUILTIN_MODULES",
+    # MyShell (self-configuration)
+    "MyShellModule",
     # AWS
     "AWSModule",
     # Containers

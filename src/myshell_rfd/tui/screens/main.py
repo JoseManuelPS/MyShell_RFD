@@ -1,29 +1,17 @@
 """Main screen for MyShell_RFD TUI."""
 
 from textual.app import ComposeResult
-from textual.binding import Binding
 from textual.containers import Container, Horizontal, Vertical
-from textual.screen import Screen
-from textual.widgets import Button, DataTable, Label, Static
+from textual.widgets import Button, DataTable, Label
 
-from myshell_rfd.core.module_base import ModuleCategory
 from myshell_rfd.core.registry import init_registry
 
 
-class MainScreen(Screen[None]):
-    """Main dashboard screen.
+class MainScreen(Container):
+    """Main dashboard container.
 
     Shows module overview and quick actions.
     """
-
-    BINDINGS = [
-        Binding("i", "install", "Install"),
-        Binding("u", "uninstall", "Uninstall"),
-        Binding("a", "auto_detect", "Auto-detect"),
-        Binding("c", "clean", "Clean"),
-        Binding("p", "profiles", "Profiles"),
-        Binding("s", "settings", "Settings"),
-    ]
 
     def compose(self) -> ComposeResult:
         """Compose the main screen layout."""

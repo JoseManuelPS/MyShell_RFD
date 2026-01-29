@@ -26,6 +26,12 @@ class MyShellApp(App[None]):
         Binding("?", "help", "Help", show=True),
         Binding("d", "toggle_dark", "Dark/Light", show=True),
         Binding("r", "refresh", "Refresh", show=True),
+        Binding("i", "install", "Install"),
+        Binding("u", "uninstall", "Uninstall"),
+        Binding("a", "auto_detect", "Auto-detect"),
+        Binding("c", "clean", "Clean"),
+        Binding("p", "profiles", "Profiles"),
+        Binding("s", "settings", "Settings"),
     ]
 
     CSS = """
@@ -158,6 +164,30 @@ class MyShellApp(App[None]):
     def action_refresh(self) -> None:
         """Refresh the current view."""
         self.query_one(MainScreen).refresh_modules()
+
+    def action_install(self) -> None:
+        """Install selected module."""
+        self.query_one(MainScreen).action_install()
+
+    def action_uninstall(self) -> None:
+        """Uninstall selected module."""
+        self.query_one(MainScreen).action_uninstall()
+
+    def action_auto_detect(self) -> None:
+        """Run auto-detection."""
+        self.query_one(MainScreen).action_auto_detect()
+
+    def action_clean(self) -> None:
+        """Clean all configuration."""
+        self.query_one(MainScreen).action_clean()
+
+    def action_profiles(self) -> None:
+        """Show profiles screen."""
+        self.query_one(MainScreen).action_profiles()
+
+    def action_settings(self) -> None:
+        """Show settings screen."""
+        self.query_one(MainScreen).action_settings()
 
 
 def run() -> None:

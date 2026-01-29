@@ -3,6 +3,7 @@
 Replaces colors.sh and lecho.sh functionality with modern Rich output.
 """
 
+from datetime import datetime
 from enum import Enum
 from typing import Any
 
@@ -34,7 +35,7 @@ class LogLevel(str, Enum):
 # Custom theme for MyShell_RFD
 MYSHELL_THEME = Theme(
     {
-        "info": Style(color="blue"),
+        "info": Style(),  # No color for INFO
         "success": Style(color="green", bold=True),
         "warn": Style(color="yellow"),
         "error": Style(color="red", bold=True),
@@ -49,13 +50,14 @@ MYSHELL_THEME = Theme(
     }
 )
 
-# Prefixes for each log level (matching original lecho.sh behavior)
-LOG_PREFIXES: dict[LogLevel, tuple[str, str]] = {
-    LogLevel.DEBUG: ("[DEBUG]", "debug"),
-    LogLevel.INFO: ("[INFO]", "info"),
-    LogLevel.SUCCESS: ("[OK]", "success"),
-    LogLevel.WARN: ("[WARN]", "warn"),
-    LogLevel.ERROR: ("[ERROR]", "error"),
+# Log level names and styles (name padded to 5 chars for alignment)
+# Format in debug mode: "LEVEL [YYYY-MM-DD HH:MM:SS] message"
+LOG_LEVELS: dict[LogLevel, tuple[str, str | None]] = {
+    LogLevel.DEBUG: ("DEBUG", "debug"),
+    LogLevel.INFO: ("INFO", None),  # No style for INFO
+    LogLevel.SUCCESS: ("OK", "success"),
+    LogLevel.WARN: ("WARN", "warn"),
+    LogLevel.ERROR: ("ERROR", "error"),
 }
 
 
@@ -101,6 +103,9 @@ class Logger:
     def log(self, level: LogLevel, message: str, **kwargs: Any) -> None:
         """Log a message with the specified level.
 
+        In debug mode, shows full format: LEVEL [YYYY-MM-DD HH:MM:SS] message
+        In normal mode, shows only: message (with appropriate styling)
+
         Args:
             level: The log level.
             message: The message to log.
@@ -112,10 +117,22 @@ class Logger:
         if self._quiet and level == LogLevel.INFO:
             return
 
-        prefix, style = LOG_PREFIXES[level]
+        level_name, style = LOG_LEVELS[level]
         text = Text()
-        text.append(f"{prefix} ", style=style)
-        text.append(message)
+
+        if self._debug_mode:
+            # Debug mode: "LEVEL [YYYY-MM-DD HH:MM:SS] message"
+            # Level name padded to 5 chars for alignment
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            text.append(f"{level_name:<5} ", style=style)
+            text.append(f"[{timestamp}] ", style="muted")
+            text.append(message)
+        else:
+            # Normal mode: show only message with style (INFO has no style)
+            if style:
+                text.append(message, style=style)
+            else:
+                text.append(message)
 
         console = self._err_console if level == LogLevel.ERROR else self._console
         console.print(text, **kwargs)

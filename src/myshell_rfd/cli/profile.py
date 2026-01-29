@@ -12,7 +12,10 @@ from rich.table import Table
 from myshell_rfd.cli import app, console
 
 # Create profile sub-app
-profile_app = typer.Typer(help="Manage configuration profiles")
+profile_app = typer.Typer(
+    help="Manage configuration profiles",
+    context_settings={"help_option_names": ["-h", "--help"]},
+)
 app.add_typer(profile_app, name="profile")
 
 

@@ -152,11 +152,11 @@ def detect() -> None:
     configured = installer.auto_detect_and_configure()
 
     if configured:
-        console.print(f"\n[green]Configured {len(configured)} modules:[/green]")
+        logger.success(f"Configured {len(configured)} modules:")
         for name in configured:
-            console.print(f"  - {name}")
+            logger.print(f"  - {name}")
     else:
-        console.print("[yellow]No new modules to configure[/yellow]")
+        logger.warn("No new modules to configure")
 
 
 @app.command()

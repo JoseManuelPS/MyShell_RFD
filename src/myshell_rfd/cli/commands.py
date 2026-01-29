@@ -76,11 +76,15 @@ def info(
     """Show detailed information about a module."""
     from myshell_rfd.core.registry import init_registry
 
+    from myshell_rfd.utils.logger import get_logger
+
+    logger = get_logger()
+
     registry = init_registry()
     mod = registry.get(module)
 
     if not mod:
-        console.print(f"[red]Module '{module}' not found[/red]")
+        logger.error(f"Module '{module}' not found")
         raise typer.Exit(1)
 
     mod_info = mod.info

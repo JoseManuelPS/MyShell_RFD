@@ -19,6 +19,7 @@ app = typer.Typer(
     add_completion=True,
     no_args_is_help=False,
     rich_markup_mode="rich",
+    context_settings={"help_option_names": ["-h", "--help"]},
 )
 
 # Shared console instance

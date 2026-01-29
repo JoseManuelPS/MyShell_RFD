@@ -33,16 +33,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \\
     && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -m -s /bin/bash builder
-USER builder
 WORKDIR /home/builder
 
-RUN pip install --user uv
+RUN pip install uv
 ENV PATH="/home/builder/.local/bin:${PATH}"
 
 WORKDIR /build
 COPY --chown=builder:builder . .
 
 # Install only runtime dependencies + PyInstaller (no dev dependencies)
+# System install requires root permissions
 RUN uv pip install --system \\
     textual rich typer \\
     tomli-w httpx platformdirs \\
@@ -50,6 +50,9 @@ RUN uv pip install --system \\
 
 # Install the package without dependencies (already installed above)
 RUN uv pip install --system --no-deps -e .
+
+# Switch to builder user for the actual build
+USER builder
 
 RUN python scripts/build.py --local --no-verify
 
@@ -90,6 +93,7 @@ def build_local(*, debug: bool = False) -> Path:
         "--hidden-import=myshell_rfd.modules.cloud",
         "--hidden-import=myshell_rfd.modules.tools",
         "--hidden-import=myshell_rfd.modules.vcs",
+        "--hidden-import=myshell_rfd.modules.myshell",
         "--hidden-import=myshell_rfd.modules.shell_plugins",
         "--hidden-import=myshell_rfd.modules.themes",
         "--hidden-import=myshell_rfd.cli",
