@@ -1,71 +1,153 @@
-# MyShell_RFD
+# MyShell_RFD v2.0
 
-![Version](https://img.shields.io/badge/version-v1.0.1-blue.svg)
-![Build](https://img.shields.io/badge/build-passing-green.svg)
-
-**MyShell_RFD** is a professional, modular configuration tool for ZSH and Bash environments.
+Professional, modular configuration tool for ZSH environments.
 
 ## Features
 
-- **Modular Architecture**: separate core logic from feature modules.
-- **Single Binary Distribution**: Builds into a single self-contained script.
-- **CLI Management**: Install specific modules, clean configuration, and self-update.
+- **Modern TUI**: Beautiful terminal interface built with Textual
+- **ZSH Focused**: Optimized for ZSH with Oh My Zsh integration
+- **22+ Tool Modules**: AWS, Kubectl, Docker, Terraform, and more
+- **Profile Management**: Switch between work, personal, and custom profiles
+- **Rollback System**: Safely revert configuration changes
+- **Offline Mode**: Cache installers for offline use
+- **Plugin System**: Extend with custom modules
 
 ## Installation
 
-### Via MyEnv_RFD (Recommended)
-Add `myshell_rfd` to your `myenv_rfd` configuration and deploy.
+### Using uv (Recommended)
 
-### Manual
 ```bash
-make install
+# Install uv if not present
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create virtual environment and install
+uv venv
+source .venv/bin/activate
+uv pip install -e ".[dev]"
+```
+
+### Using pip
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
 ```
 
 ## Usage
 
-### Interactive Mode
-Run without arguments to start the full interactive configuration wizard:
+### Interactive Mode (TUI)
+
 ```bash
-myshell_rfd
+# Run without arguments to launch interactive TUI
+myshell
 ```
 
-### CLI Commands
+### CLI Mode
 
-#### Install Specific Module
-Run a specific module (e.g., AWS, Kubectl) directly:
 ```bash
-myshell_rfd install AWS
-myshell_rfd install Kubectl
+# List available modules
+myshell list
+
+# Install specific module
+myshell install aws
+myshell install kubectl
+
+# List available modules
+myshell list
+
+# Show module info
+myshell info kubectl
+
+# Manage profiles
+myshell profile list
+myshell profile switch work
+myshell profile export backup.toml
+
+# Rollback changes
+myshell rollback list
+myshell rollback apply <snapshot-id>
+
+# Update
+myshell update
+
+# Clean configuration
+myshell clean
 ```
 
-#### Selective Install
-Launch an interactive menu to choose a module:
-```bash
-myshell_rfd install
-```
+### Options
 
-#### Update
-Update the tool to the latest version available on GitHub:
 ```bash
-myshell_rfd update
-```
-*Note: Requires sudo permissions to overwrite `/usr/local/bin`.*
+# Auto-accept all prompts
+myshell --yes install
 
-#### Clean / Reset
-Remove the current configuration and back it up:
-```bash
-myshell_rfd clean
+# Offline mode
+myshell --offline install kubectl
+
+# Use specific profile
+myshell --profile work install
 ```
-*Backups are stored in `~/.myshell_rfd/backups`.*
 
 ## Configuration
-- **Root**: `~/.myshell_rfd/`
-- **Config**: `~/.myshell_rfd/config`
-- **Backups**: `~/.myshell_rfd/backups/`
+
+Configuration is stored in `~/.myshell_rfd/`:
+
+```
+~/.myshell_rfd/
+├── config.toml          # Main configuration
+├── profiles/            # Named profiles
+│   ├── default.toml
+│   ├── work.toml
+│   └── personal.toml
+├── cache/               # Offline cache
+├── backups/             # Rollback snapshots
+└── plugins/             # External plugins
+```
 
 ## Development
-- `make build`: Generate `dist/myshell_rfd`.
-- `make test`: Run BATS tests.
+
+```bash
+# Run tests
+uv run pytest tests/ -v
+
+# Run tests with coverage
+uv run pytest tests/ -v --cov=src/myshell_rfd --cov-report=term-missing
+
+# Linting
+uv run ruff check src/ tests/
+
+# Format code
+uv run ruff format src/ tests/
+```
+
+## Building Binary
+
+The build script uses Docker/Podman to create a portable binary compatible with
+RHEL 9+ and Ubuntu 24.04+. This ensures glibc compatibility across distributions.
+
+```bash
+# Build using container (recommended - portable binary)
+python scripts/build.py
+
+# Build locally (uses system glibc - less portable)
+python scripts/build.py --local
+
+# Clean build artifacts
+python scripts/build.py --clean
+
+# Force specific container runtime
+python scripts/build.py --runtime docker
+python scripts/build.py --runtime podman
+```
+
+### Binary Compatibility
+
+The containerized build uses Debian 11 (glibc 2.31) as base, ensuring
+compatibility with:
+- RHEL 9+ (glibc 2.34)
+- Ubuntu 24.04+ (glibc 2.39)
+- Any Linux distribution with glibc >= 2.31
 
 ## License
-Confidential / Proprietary.
+
+Proprietary - All rights reserved.
