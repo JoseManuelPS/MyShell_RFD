@@ -195,48 +195,22 @@ class ModuleRegistry:
     def discover_builtin(self) -> int:
         """Discover and register built-in modules.
 
+        Uses the explicit BUILTIN_MODULES list from modules/__init__.py
+        instead of dynamic introspection with dir().
+
         Returns:
             Number of modules registered.
         """
-        from myshell_rfd import modules as modules_pkg
+        from myshell_rfd.modules import BUILTIN_MODULES
 
         count = 0
-
-        # Import all module files
-        module_files = [
-            "aws",
-            "containers",
-            "kubernetes",
-            "cloud",
-            "tools",
-            "vcs",
-            "shell_plugins",
-            "themes",
-        ]
-
-        for module_name in module_files:
+        for module_class in BUILTIN_MODULES:
             try:
-                module = importlib.import_module(f"myshell_rfd.modules.{module_name}")
-
-                # Look for module classes (subclasses of BaseModule)
-                for attr_name in dir(module):
-                    attr = getattr(module, attr_name)
-                    if (
-                        isinstance(attr, type)
-                        and issubclass(attr, BaseModule)
-                        and attr is not BaseModule
-                        and not attr_name.startswith("_")
-                    ):
-                        # Check if it's a concrete class (not abstract)
-                        try:
-                            self.register(attr)
-                            count += 1
-                        except TypeError:
-                            # Abstract class, skip
-                            pass
-
-            except ImportError as e:
-                self._logger.debug(f"Could not import {module_name}: {e}")
+                self.register(module_class)
+                count += 1
+            except TypeError:
+                # Abstract class or instantiation error, skip
+                self._logger.debug(f"Could not register {module_class.__name__}")
 
         self._logger.debug(f"Discovered {count} built-in modules")
         return count

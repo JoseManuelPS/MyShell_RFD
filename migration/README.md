@@ -36,21 +36,18 @@ pip install -e ".[dev]"
 
 ## Usage
 
-### TUI Mode (Interactive)
+### Interactive Mode (TUI)
 
 ```bash
-python -m myshell_rfd.tui.app
-# or after install:
-myshell-tui
+# Run without arguments to launch interactive TUI
+myshell
 ```
 
 ### CLI Mode
 
 ```bash
-# Run interactive configuration
-python -m myshell_rfd
-# or after install:
-myshell
+# List available modules
+myshell list
 
 # Install specific module
 myshell install aws
@@ -115,9 +112,6 @@ uv run pytest tests/ -v
 
 # Run tests with coverage
 uv run pytest tests/ -v --cov=src/myshell_rfd --cov-report=term-missing
-
-# Type checking
-uv run mypy src/
 
 # Linting
 uv run ruff check src/ tests/

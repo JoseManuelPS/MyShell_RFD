@@ -33,7 +33,47 @@ from myshell_rfd.modules.tools import (
 )
 from myshell_rfd.modules.vcs import GitHubModule, GitLabModule
 
+# Explicit list of all built-in module classes for registration.
+# This list is used by the registry to discover modules without dynamic introspection.
+# When adding a new module, add it here AND import it above.
+BUILTIN_MODULES = [
+    # AWS
+    AWSModule,
+    # Containers
+    DockerModule,
+    PodmanModule,
+    # Kubernetes
+    KubectlModule,
+    HelmModule,
+    MinikubeModule,
+    EksctlModule,
+    OCModule,
+    RosaModule,
+    TridentctlModule,
+    # Cloud
+    TerraformModule,
+    OpenTofuModule,
+    # Tools
+    FZFModule,
+    BatcatModule,
+    PLSModule,
+    PythonVenvModule,
+    NVMModule,
+    KPluginModule,
+    # VCS
+    GitHubModule,
+    GitLabModule,
+    # Shell plugins
+    ZshAutosuggestionsModule,
+    ZshAutocompletionsModule,
+    ZshSyntaxHighlightingModule,
+    # Themes
+    PowerLevel10KModule,
+]
+
 __all__ = [
+    # Module list
+    "BUILTIN_MODULES",
     # AWS
     "AWSModule",
     # Containers

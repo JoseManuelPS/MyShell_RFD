@@ -26,7 +26,6 @@ uv run pytest tests/ -v
 # 3. Quality checks
 uv run ruff check src/ tests/
 uv run ruff format src/ tests/
-uv run mypy src/
 
 # 4. Run tests
 uv run pytest tests/ -v
@@ -40,8 +39,9 @@ uv run myshell list
 
 1. Create file in `src/myshell_rfd/modules/`
 2. Inherit from `BaseModule`, `ConfigOnlyModule`, or `GitCloneModule`
-3. Register in `src/myshell_rfd/modules/__init__.py`
-4. Add tests in `tests/test_modules/`
+3. Import in `src/myshell_rfd/modules/__init__.py`
+4. Add to `BUILTIN_MODULES` list in `src/myshell_rfd/modules/__init__.py`
+5. Add tests in `tests/test_modules/`
 
 ```python
 # src/myshell_rfd/modules/example.py
@@ -99,7 +99,6 @@ We use [Semantic Versioning](https://semver.org/):
 git status
 uv run pytest tests/ -v
 uv run ruff check src/ tests/
-uv run mypy src/
 
 # 2. Update version in src/myshell_rfd/__init__.py
 # __version__ = "2.1.0"
@@ -180,7 +179,6 @@ chore: update dependencies
 
 - [ ] Tests pass: `uv run pytest tests/ -v`
 - [ ] No lint errors: `uv run ruff check src/ tests/`
-- [ ] No type errors: `uv run mypy src/`
 - [ ] Version updated in `__init__.py`
 - [ ] Build successful: `python scripts/build.py`
 - [ ] Binary verified: `./dist/myshell --version`

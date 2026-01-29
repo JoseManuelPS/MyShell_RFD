@@ -1,19 +1,22 @@
 """Configuration models and management for MyShell_RFD.
 
-Uses Pydantic v2 for validation and TOML for persistence.
+Uses dataclasses for models and TOML for persistence.
 Implements profile support (E2).
 """
 
+from __future__ import annotations
+
+import copy
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Self
+from typing import Any
 
-import tomli
+import tomllib  # stdlib since Python 3.11
 import tomli_w
-from pydantic import BaseModel, Field, field_validator
 
-from myshell_rfd.utils.files import CONFIG_DIR, PROFILES_DIR
+from myshell_rfd.utils.files import CONFIG_DIR
 
 
 # ZSH is the only supported shell
@@ -29,7 +32,8 @@ class ModuleState(str, Enum):
     ERROR = "error"
 
 
-class ModuleConfig(BaseModel):
+@dataclass
+class ModuleConfig:
     """Configuration for a single module.
 
     Attributes:
@@ -42,12 +46,40 @@ class ModuleConfig(BaseModel):
     enabled: bool = True
     state: ModuleState = ModuleState.NOT_INSTALLED
     installed_at: datetime | None = None
-    settings: dict[str, Any] = Field(default_factory=dict)
+    settings: dict[str, Any] = field(default_factory=dict)
 
-    model_config = {"use_enum_values": True}
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary for TOML serialization."""
+        result: dict[str, Any] = {
+            "enabled": self.enabled,
+            "state": self.state.value if isinstance(self.state, Enum) else self.state,
+            "settings": self.settings,
+        }
+        if self.installed_at is not None:
+            result["installed_at"] = self.installed_at.isoformat()
+        return result
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> ModuleConfig:
+        """Create from dictionary."""
+        state = data.get("state", "not_installed")
+        if isinstance(state, str):
+            state = ModuleState(state)
+
+        installed_at = data.get("installed_at")
+        if isinstance(installed_at, str):
+            installed_at = datetime.fromisoformat(installed_at)
+
+        return cls(
+            enabled=data.get("enabled", True),
+            state=state,
+            installed_at=installed_at,
+            settings=data.get("settings", {}),
+        )
 
 
-class ShellConfig(BaseModel):
+@dataclass
+class ShellConfig:
     """Shell-specific configuration.
 
     Attributes:
@@ -58,20 +90,52 @@ class ShellConfig(BaseModel):
     """
 
     config_file: Path | None = None
-    plugins: list[str] = Field(default_factory=list)
+    plugins: list[str] = field(default_factory=list)
     theme: str = "default"
-    aliases: dict[str, str] = Field(default_factory=dict)
+    aliases: dict[str, str] = field(default_factory=dict)
 
-    @field_validator("config_file", mode="before")
+    def __post_init__(self) -> None:
+        """Validate and convert types after initialization."""
+        if isinstance(self.config_file, str):
+            self.config_file = Path(self.config_file)
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary for TOML serialization."""
+        result: dict[str, Any] = {
+            "plugins": self.plugins,
+            "theme": self.theme,
+            "aliases": self.aliases,
+        }
+        if self.config_file is not None:
+            result["config_file"] = str(self.config_file)
+        return result
+
     @classmethod
-    def validate_path(cls, v: Any) -> Path | None:
-        """Convert string to Path."""
-        if v is None:
-            return None
-        return Path(v) if isinstance(v, str) else v
+    def from_dict(cls, data: dict[str, Any]) -> ShellConfig:
+        """Create from dictionary."""
+        config_file = data.get("config_file")
+        if isinstance(config_file, str):
+            config_file = Path(config_file)
+
+        return cls(
+            config_file=config_file,
+            plugins=data.get("plugins", []),
+            theme=data.get("theme", "default"),
+            aliases=data.get("aliases", {}),
+        )
+
+    def copy(self) -> ShellConfig:
+        """Create a deep copy."""
+        return ShellConfig(
+            config_file=self.config_file,
+            plugins=self.plugins.copy(),
+            theme=self.theme,
+            aliases=self.aliases.copy(),
+        )
 
 
-class ProfileConfig(BaseModel):
+@dataclass
+class ProfileConfig:
     """A named configuration profile.
 
     Attributes:
@@ -85,12 +149,10 @@ class ProfileConfig(BaseModel):
 
     name: str = "default"
     description: str = ""
-    modules: dict[str, ModuleConfig] = Field(default_factory=dict)
-    shell_config: ShellConfig = Field(default_factory=ShellConfig)
-    created_at: datetime = Field(default_factory=datetime.now)
-    updated_at: datetime = Field(default_factory=datetime.now)
-
-    model_config = {"use_enum_values": True}
+    modules: dict[str, ModuleConfig] = field(default_factory=dict)
+    shell_config: ShellConfig = field(default_factory=ShellConfig)
+    created_at: datetime = field(default_factory=datetime.now)
+    updated_at: datetime = field(default_factory=datetime.now)
 
     def enable_module(self, name: str, **settings: Any) -> None:
         """Enable a module with optional settings.
@@ -137,8 +199,62 @@ class ProfileConfig(BaseModel):
         """
         return [name for name, config in self.modules.items() if config.enabled]
 
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary for TOML serialization."""
+        return {
+            "name": self.name,
+            "description": self.description,
+            "modules": {name: cfg.to_dict() for name, cfg in self.modules.items()},
+            "shell_config": self.shell_config.to_dict(),
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }
 
-class AppConfig(BaseModel):
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> ProfileConfig:
+        """Create from dictionary."""
+        modules = {}
+        for name, cfg_data in data.get("modules", {}).items():
+            modules[name] = ModuleConfig.from_dict(cfg_data)
+
+        shell_config_data = data.get("shell_config", {})
+        shell_config = ShellConfig.from_dict(shell_config_data)
+
+        created_at = data.get("created_at")
+        if isinstance(created_at, str):
+            created_at = datetime.fromisoformat(created_at)
+        else:
+            created_at = datetime.now()
+
+        updated_at = data.get("updated_at")
+        if isinstance(updated_at, str):
+            updated_at = datetime.fromisoformat(updated_at)
+        else:
+            updated_at = datetime.now()
+
+        return cls(
+            name=data.get("name", "default"),
+            description=data.get("description", ""),
+            modules=modules,
+            shell_config=shell_config,
+            created_at=created_at,
+            updated_at=updated_at,
+        )
+
+    def copy(self) -> ProfileConfig:
+        """Create a deep copy."""
+        return ProfileConfig(
+            name=self.name,
+            description=self.description,
+            modules={name: copy.deepcopy(cfg) for name, cfg in self.modules.items()},
+            shell_config=self.shell_config.copy(),
+            created_at=self.created_at,
+            updated_at=self.updated_at,
+        )
+
+
+@dataclass
+class AppConfig:
     """Main application configuration.
 
     Attributes:
@@ -156,14 +272,11 @@ class AppConfig(BaseModel):
     auto_detect: bool = True
     offline_mode: bool = False
     debug: bool = False
-    profiles: dict[str, ProfileConfig] = Field(default_factory=dict)
+    profiles: dict[str, ProfileConfig] = field(default_factory=dict)
     last_update_check: datetime | None = None
 
-    model_config = {"use_enum_values": True}
-
-    def __init__(self, **data: Any) -> None:
-        """Initialize with default profile if empty."""
-        super().__init__(**data)
+    def __post_init__(self) -> None:
+        """Ensure default profile exists."""
         if not self.profiles:
             self.profiles["default"] = ProfileConfig(name="default")
 
@@ -222,12 +335,11 @@ class AppConfig(BaseModel):
         if copy_from and copy_from in self.profiles:
             # Deep copy from existing profile
             source = self.profiles[copy_from]
-            profile = ProfileConfig(
-                name=name,
-                description=description or source.description,
-                modules=source.modules.copy(),
-                shell_config=source.shell_config.model_copy(),
-            )
+            profile = source.copy()
+            profile.name = name
+            profile.description = description or source.description
+            profile.created_at = datetime.now()
+            profile.updated_at = datetime.now()
         else:
             profile = ProfileConfig(
                 name=name,
@@ -266,8 +378,44 @@ class AppConfig(BaseModel):
         """
         return list(self.profiles.keys())
 
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary for TOML serialization."""
+        result: dict[str, Any] = {
+            "version": self.version,
+            "active_profile": self.active_profile,
+            "auto_detect": self.auto_detect,
+            "offline_mode": self.offline_mode,
+            "debug": self.debug,
+            "profiles": {name: p.to_dict() for name, p in self.profiles.items()},
+        }
+        if self.last_update_check is not None:
+            result["last_update_check"] = self.last_update_check.isoformat()
+        return result
+
     @classmethod
-    def from_toml(cls, path: Path) -> Self:
+    def from_dict(cls, data: dict[str, Any]) -> AppConfig:
+        """Create from dictionary."""
+        profiles = {}
+        for name, profile_data in data.get("profiles", {}).items():
+            profiles[name] = ProfileConfig.from_dict(profile_data)
+
+        last_update_check = data.get("last_update_check")
+        if isinstance(last_update_check, str):
+            last_update_check = datetime.fromisoformat(last_update_check)
+
+        config = cls(
+            version=data.get("version", "2.0.0"),
+            active_profile=data.get("active_profile", "default"),
+            auto_detect=data.get("auto_detect", True),
+            offline_mode=data.get("offline_mode", False),
+            debug=data.get("debug", False),
+            profiles=profiles,
+            last_update_check=last_update_check,
+        )
+        return config
+
+    @classmethod
+    def from_toml(cls, path: Path) -> AppConfig:
         """Load configuration from TOML file.
 
         Args:
@@ -280,9 +428,9 @@ class AppConfig(BaseModel):
             return cls()
 
         with open(path, "rb") as f:
-            data = tomli.load(f)
+            data = tomllib.load(f)
 
-        return cls.model_validate(data)
+        return cls.from_dict(data)
 
     def to_toml(self, path: Path) -> None:
         """Save configuration to TOML file.
@@ -291,9 +439,7 @@ class AppConfig(BaseModel):
             path: Path to save to.
         """
         path.parent.mkdir(parents=True, exist_ok=True)
-
-        # Convert to dict, exclude None values (not TOML serializable)
-        data = self.model_dump(mode="json", exclude_none=True)
+        data = self.to_dict()
 
         with open(path, "wb") as f:
             tomli_w.dump(data, f)
@@ -312,7 +458,7 @@ class AppConfig(BaseModel):
             raise ValueError(f"Profile '{name}' does not exist")
 
         profile = self.profiles[name]
-        data = profile.model_dump(mode="json", exclude_none=True)
+        data = profile.to_dict()
 
         with open(path, "wb") as f:
             tomli_w.dump(data, f)
@@ -334,9 +480,9 @@ class AppConfig(BaseModel):
             raise FileNotFoundError(f"Profile file not found: {path}")
 
         with open(path, "rb") as f:
-            data = tomli.load(f)
+            data = tomllib.load(f)
 
-        profile = ProfileConfig.model_validate(data)
+        profile = ProfileConfig.from_dict(data)
 
         if name:
             profile.name = name

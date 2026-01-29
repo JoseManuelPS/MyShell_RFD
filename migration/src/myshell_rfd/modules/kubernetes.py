@@ -3,6 +3,8 @@
 Configures kubectl, helm, minikube, eksctl, oc, rosa, and tridentctl.
 """
 
+from pathlib import Path
+
 from myshell_rfd.core.config import ModuleConfig
 from myshell_rfd.core.module_base import (
     BaseModule,
@@ -98,19 +100,16 @@ export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH\""""
         with tempfile.TemporaryDirectory() as tmpdir:
             # Download Krew
             url = f"https://github.com/kubernetes-sigs/krew/releases/latest/download/{krew_name}.tar.gz"
-            tar_path = f"{tmpdir}/{krew_name}.tar.gz"
+            tar_path = Path(tmpdir) / f"{krew_name}.tar.gz"
 
-            result = self._runner.run(
-                ["curl", "-fsSL", "-o", tar_path, url],
-                timeout=120.0,
-            )
+            result = self._runner.download(url, tar_path, timeout=120.0)
 
             if not result.success:
                 self._logger.error(f"Failed to download Krew: {result.stderr}")
                 return False
 
             # Extract
-            self._runner.run(["tar", "-xzf", tar_path, "-C", tmpdir])
+            self._runner.run(["tar", "-xzf", str(tar_path), "-C", tmpdir])
 
             # Install
             krew_bin = f"{tmpdir}/{krew_name}"

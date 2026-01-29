@@ -218,24 +218,30 @@ def mock_shell(monkeypatch, tmp_path: Path):
 src/myshell_rfd/
 ├── __init__.py          # Package version, public exports
 ├── __main__.py          # Entry: python -m myshell_rfd
-├── cli.py               # Typer CLI application
+│
+├── cli/                 # CLI application (split for agent-friendliness)
+│   ├── __init__.py      # Main Typer app, shared console
+│   ├── main.py          # list, info, update commands
+│   ├── install.py       # install, uninstall, detect, clean commands
+│   ├── profile.py       # profile subcommands
+│   └── rollback.py      # rollback subcommands
 │
 ├── core/                # Business logic (UI-agnostic)
-│   ├── config.py        # Pydantic models: AppConfig, ProfileConfig
+│   ├── config.py        # Dataclass models: AppConfig, ProfileConfig
 │   ├── module_base.py   # BaseModule, ConfigOnlyModule, GitCloneModule
-│   ├── registry.py      # Module discovery and lifecycle
+│   ├── registry.py      # Module registration (explicit, no magic)
 │   ├── installer.py     # Installation orchestrator
 │   ├── rollback.py      # Snapshot management
 │   └── shell.py         # ZSH/Oh-My-Zsh operations
 │
 ├── modules/             # Installable modules (one class per tool)
-│   ├── __init__.py      # BUILTIN_MODULES list
+│   ├── __init__.py      # BUILTIN_MODULES explicit list
 │   ├── aws.py           # AWSModule
 │   ├── containers.py    # DockerModule, PodmanModule
 │   ├── kubernetes.py    # KubectlModule, HelmModule, MinikubeModule, etc.
-│   ├── cloud.py         # TerraformModule, RosaModule, EksctlModule
+│   ├── cloud.py         # TerraformModule, OpenTofuModule
 │   ├── tools.py         # FZFModule, BatcatModule, PLSModule, NVMModule
-│   ├── vcs.py           # GitModule, GitHubModule
+│   ├── vcs.py           # GitHubModule, GitLabModule
 │   ├── shell_plugins.py # ZshAutosuggestionsModule, ZshSyntaxHighlightingModule
 │   └── themes.py        # PowerLevel10KModule
 │
@@ -252,7 +258,7 @@ src/myshell_rfd/
 └── utils/               # Shared utilities
     ├── logger.py        # Rich-based colored logging
     ├── files.py         # Safe file ops with backup
-    ├── process.py       # Subprocess wrappers
+    ├── process.py       # HTTP downloads (httpx), subprocess wrappers
     └── detect.py        # Binary detection, version parsing
 ```
 
@@ -275,10 +281,10 @@ User Command
      │                          └──────────────┘
      │                                  │
      ▼                                  ▼
-┌─────────┐                     ┌──────────────┐
-│ AppConfig│◀────────────────────│ ~/.myshell_  │
-│ (Pydantic)                    │ rfd/config.  │
-└─────────┘                     │ zsh          │
+┌───────────┐                   ┌──────────────┐
+│ AppConfig │◀──────────────────│ ~/.myshell_  │
+│(dataclass)│                   │ rfd/config.  │
+└───────────┘                   │ toml         │
                                 └──────────────┘
 ```
 
@@ -286,9 +292,9 @@ User Command
 
 | Class | Responsibility |
 |-------|---------------|
-| `AppConfig` | Load/save TOML config, manage profiles |
-| `ProfileConfig` | Track enabled modules per profile |
-| `ModuleRegistry` | Discover, register, lookup modules |
+| `AppConfig` | Load/save TOML config, manage profiles (dataclass) |
+| `ProfileConfig` | Track enabled modules per profile (dataclass) |
+| `ModuleRegistry` | Register and lookup modules (explicit, no magic) |
 | `BaseModule` | Abstract interface all modules implement |
 | `ConfigOnlyModule` | Base for modules that only write config |
 | `GitCloneModule` | Base for modules that clone repositories |
@@ -433,12 +439,12 @@ class ComplexModule(BaseModule):
 
 1. **Read existing code first** — Understand the patterns already in use
 2. **Run tests** — Ensure baseline passes: `uv run pytest tests/ -v`
-3. **Check types** — Run `uv run mypy src/` before and after changes
+3. **Run linter** — Check code quality: `uv run ruff check src/ tests/`
 
 ### When Adding Features
 
 1. **Follow existing patterns** — Use `ConfigOnlyModule` or `GitCloneModule` when possible
-2. **Add to registry** — Update `modules/__init__.py` with new modules
+2. **Add to registry** — Import in `modules/__init__.py` AND add to `BUILTIN_MODULES` list
 3. **Write tests** — Minimum: test `info`, `get_config_content`, `install`
 4. **Update docs** — Add to README if user-facing
 
@@ -488,7 +494,6 @@ sed -i "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" \
 # 2. Run full checks
 uv run pytest tests/ -v
 uv run ruff check src/ tests/
-uv run mypy src/
 
 # 3. Commit and tag
 git add -A
@@ -514,9 +519,9 @@ gh release create "v$VERSION" \
 |---------|----------|
 | Tests fail with permission error | Run with `--all` permissions or check sandbox |
 | Import errors | Run `uv pip install -e ".[dev]"` |
-| mypy errors about missing stubs | Add to `[tool.mypy]` ignore list if third-party |
 | Binary too large | Check for unnecessary `--collect-data` in build.py |
 | Config not loading | Check `~/.myshell_rfd/config.toml` syntax |
+| Module not found | Ensure it's in BUILTIN_MODULES list in modules/__init__.py |
 
 ### Debug Commands
 
@@ -524,14 +529,15 @@ gh release create "v$VERSION" \
 # Verbose test output
 uv run pytest tests/ -v -s --tb=long
 
-# Type check with verbose errors
-uv run mypy src/ --show-error-codes --pretty
-
 # Check what ruff would fix
 uv run ruff check src/ --diff
 
 # Run single module manually
 uv run python -c "from myshell_rfd.modules.aws import AWSModule; print(AWSModule().info)"
+
+# Test CLI directly
+uv run myshell --help
+uv run myshell list
 ```
 
 ---

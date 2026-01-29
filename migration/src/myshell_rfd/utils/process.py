@@ -318,28 +318,62 @@ class ProcessRunner:
         dest: Path,
         *,
         executable: bool = False,
+        timeout: float = 600.0,
     ) -> ProcessResult:
-        """Download a file using curl.
+        """Download a file using httpx.
 
         Args:
             url: The URL to download.
             dest: Destination file path.
             executable: Make the file executable after download.
+            timeout: Download timeout in seconds.
 
         Returns:
-            ProcessResult from the curl command.
+            ProcessResult with success status.
         """
+        import httpx
+
         dest.parent.mkdir(parents=True, exist_ok=True)
 
-        result = self.run(
-            ["curl", "-fsSL", "-o", str(dest), url],
-            timeout=600.0,  # Allow longer timeout for downloads
-        )
+        try:
+            with httpx.Client(timeout=timeout, follow_redirects=True) as client:
+                response = client.get(url)
+                response.raise_for_status()
 
-        if result.success and executable:
-            dest.chmod(dest.stat().st_mode | 0o111)
+                with open(dest, "wb") as f:
+                    f.write(response.content)
 
-        return result
+            if executable:
+                dest.chmod(dest.stat().st_mode | 0o111)
+
+            return ProcessResult(
+                success=True,
+                return_code=0,
+                stdout=f"Downloaded {url} to {dest}",
+                stderr="",
+            )
+
+        except httpx.HTTPStatusError as e:
+            return ProcessResult(
+                success=False,
+                return_code=e.response.status_code,
+                stdout="",
+                stderr=f"HTTP error {e.response.status_code}: {e.response.reason_phrase}",
+            )
+        except httpx.RequestError as e:
+            return ProcessResult(
+                success=False,
+                return_code=1,
+                stdout="",
+                stderr=f"Request error: {e}",
+            )
+        except OSError as e:
+            return ProcessResult(
+                success=False,
+                return_code=1,
+                stdout="",
+                stderr=f"File error: {e}",
+            )
 
 
 # Default instance

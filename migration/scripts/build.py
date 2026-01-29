@@ -42,7 +42,15 @@ ENV PATH="/home/builder/.local/bin:${PATH}"
 WORKDIR /build
 COPY --chown=builder:builder . .
 
-RUN uv pip install --system -e ".[dev]"
+# Install only runtime dependencies + PyInstaller (no dev dependencies)
+RUN uv pip install --system \\
+    textual rich typer \\
+    tomli-w httpx platformdirs \\
+    pyinstaller
+
+# Install the package without dependencies (already installed above)
+RUN uv pip install --system --no-deps -e .
+
 RUN python scripts/build.py --local --no-verify
 
 CMD ["cat", "/build/dist/myshell"]
@@ -74,6 +82,7 @@ def build_local(*, debug: bool = False) -> Path:
         str(SRC_DIR / "myshell_rfd" / "__main__.py"),
         "--name=myshell", "--clean", "--noconfirm", "--onefile",
         f"--add-data={SRC_DIR / 'myshell_rfd' / 'assets'}{sep}myshell_rfd/assets",
+        # Application modules
         "--hidden-import=myshell_rfd.modules",
         "--hidden-import=myshell_rfd.modules.aws",
         "--hidden-import=myshell_rfd.modules.containers",
@@ -83,22 +92,38 @@ def build_local(*, debug: bool = False) -> Path:
         "--hidden-import=myshell_rfd.modules.vcs",
         "--hidden-import=myshell_rfd.modules.shell_plugins",
         "--hidden-import=myshell_rfd.modules.themes",
+        "--hidden-import=myshell_rfd.cli",
+        "--hidden-import=myshell_rfd.cli.commands",
+        "--hidden-import=myshell_rfd.cli.install",
+        "--hidden-import=myshell_rfd.cli.profile",
+        "--hidden-import=myshell_rfd.cli.rollback",
         "--hidden-import=myshell_rfd.tui",
         "--hidden-import=myshell_rfd.tui.app",
         "--hidden-import=myshell_rfd.tui.screens",
         "--hidden-import=myshell_rfd.tui.widgets",
         "--hidden-import=myshell_rfd.plugins",
+        # Third-party dependencies
         "--hidden-import=textual",
         "--hidden-import=textual.app",
         "--hidden-import=textual.widgets",
         "--hidden-import=rich",
         "--hidden-import=rich.console",
         "--hidden-import=typer",
-        "--hidden-import=pydantic",
-        "--hidden-import=tomli",
         "--hidden-import=tomli_w",
+        # Exclude tomli (uses mypyc which causes binary issues)
+        "--exclude-module=tomli",
         "--hidden-import=httpx",
         "--collect-data=textual",
+        "--collect-data=rich",
+        "--collect-submodules=rich",
+        # Exclude development tools
+        "--exclude-module=pytest",
+        "--exclude-module=_pytest",
+        "--exclude-module=ruff",
+        # Exclude unnecessary extras
+        "--exclude-module=IPython",
+        "--exclude-module=setuptools",
+        "--exclude-module=pip",
     ]
 
     if not debug:
