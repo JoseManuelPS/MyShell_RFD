@@ -96,18 +96,8 @@ class PowerLevel10KModule(GitCloneModule):
         except Exception as e:
             self._logger.debug(f"Could not load bundled config: {e}")
 
-        # Fallback: check if file exists in assets directory
-        try:
-            import myshell_rfd
-
-            pkg_dir = Path(myshell_rfd.__file__).parent
-            assets_p10k = pkg_dir / "assets" / "p10k.zsh"
-            if assets_p10k.exists():
-                p10k_dest.write_text(assets_p10k.read_text())
-                self._logger.debug("Installed p10k configuration from assets")
-                return True
-        except Exception:
-            pass
+        # Fallback: check if file exists in assets directory (REMOVED LEGACY FALLBACK)
+        # The importlib.resources method above should be sufficient.
 
         self._logger.warn("No bundled p10k config found. Run 'p10k configure' to set up.")
         return False

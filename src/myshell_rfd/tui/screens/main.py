@@ -37,7 +37,6 @@ class MainScreen(Container):
                 with Horizontal(classes="button-bar"):
                     yield Button("Install Selected", id="btn-install", variant="success")
                     yield Button("Uninstall", id="btn-uninstall", variant="warning")
-                    yield Button("Auto-detect", id="btn-detect", variant="primary")
                     yield Button("Clean All", id="btn-clean", variant="error")
 
     def on_mount(self) -> None:
@@ -92,8 +91,6 @@ class MainScreen(Container):
             self.action_install()
         elif button_id == "btn-uninstall":
             self.action_uninstall()
-        elif button_id == "btn-detect":
-            self.action_auto_detect()
         elif button_id == "btn-clean":
             self.action_clean()
         elif button_id and button_id.startswith("cat-"):
@@ -122,20 +119,6 @@ class MainScreen(Container):
             if row_key:
                 module_name = str(row_key[0])
                 self._uninstall_module(module_name)
-
-    def action_auto_detect(self) -> None:
-        """Run auto-detection."""
-        from myshell_rfd.core.installer import get_installer
-
-        installer = get_installer()
-        configured = installer.auto_detect_and_configure()
-
-        if configured:
-            self.notify(f"Configured {len(configured)} modules", title="Auto-detect")
-        else:
-            self.notify("No new modules to configure", title="Auto-detect")
-
-        self.refresh_modules(self._current_category)
 
     def action_clean(self) -> None:
         """Clean all configuration."""

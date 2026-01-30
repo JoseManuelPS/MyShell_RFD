@@ -269,7 +269,6 @@ class AppConfig:
 
     version: str = "2.0.0"
     active_profile: str = "default"
-    auto_detect: bool = True
     offline_mode: bool = False
     debug: bool = False
     profiles: dict[str, ProfileConfig] = field(default_factory=dict)
@@ -383,7 +382,6 @@ class AppConfig:
         result: dict[str, Any] = {
             "version": self.version,
             "active_profile": self.active_profile,
-            "auto_detect": self.auto_detect,
             "offline_mode": self.offline_mode,
             "debug": self.debug,
             "profiles": {name: p.to_dict() for name, p in self.profiles.items()},
@@ -406,7 +404,6 @@ class AppConfig:
         config = cls(
             version=data.get("version", "2.0.0"),
             active_profile=data.get("active_profile", "default"),
-            auto_detect=data.get("auto_detect", True),
             offline_mode=data.get("offline_mode", False),
             debug=data.get("debug", False),
             profiles=profiles,

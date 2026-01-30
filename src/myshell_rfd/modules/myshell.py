@@ -29,7 +29,6 @@ _myshell() {
         'info:Show detailed information about a module'
         'install:Install and configure modules'
         'uninstall:Uninstall a module and remove its configuration'
-        'detect:Auto-detect installed tools and configure matching modules'
         'clean:Remove all MyShell_RFD configuration'
         'update:Check for updates and update MyShell_RFD'
         'profile:Manage configuration profiles'
@@ -155,10 +154,9 @@ class MyShellModule(BaseModule):
     def get_config_content(self, config: ModuleConfig) -> str:
         """Generate myshell shell configuration."""
         return """# MyShell_RFD aliases
-alias ms='myshell'
-alias msl='myshell list'
-alias msi='myshell install'
-alias msd='myshell detect'"""
+alias msrfd='myshell'
+alias msrfdl='myshell list'
+alias msrfdi='myshell install'"""
 
     def install(self, config: ModuleConfig) -> InstallResult:
         """Install myshell completion and configuration."""

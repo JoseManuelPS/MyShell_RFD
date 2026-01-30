@@ -6,6 +6,7 @@ plugin management, and configuration.
 
 import os
 import re
+import pwd
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -75,7 +76,11 @@ class ShellManager:
 
     def is_zsh_default(self) -> bool:
         """Check if ZSH is the default shell."""
-        shell = os.environ.get("SHELL", "")
+        try:
+            shell = pwd.getpwuid(os.getuid()).pw_shell
+        except Exception:
+            shell = os.environ.get("SHELL", "")
+            
         return shell.endswith("zsh")
 
     def install_omz(self) -> bool:
@@ -277,22 +282,8 @@ class ShellManager:
 
         # Create config file if it doesn't exist
         if not SHELL_CONFIG_FILE.exists():
-            header = (
-                "# ============================================================\n"
-                "# MyShell_RFD Configuration\n"
-                "# ============================================================\n"
-                "# This file is managed by MyShell_RFD. Do not edit manually!\n"
-                "# Your custom ZSH configuration should remain in ~/.zshrc\n"
-                "#\n"
-                "# To add/remove modules, use:\n"
-                "#   myshell install <module>\n"
-                "#   myshell uninstall <module>\n"
-                "#\n"
-                "# Or launch the TUI:\n"
-                "#   myshell\n"
-                "# ============================================================\n\n"
-            )
-            SHELL_CONFIG_FILE.write_text(header, encoding="utf-8")
+            from myshell_rfd.utils.files import CONFIG_HEADER
+            SHELL_CONFIG_FILE.write_text(CONFIG_HEADER, encoding="utf-8")
 
         # Add source line to .zshrc
         return self.ensure_source_line(SHELL_CONFIG_FILE)

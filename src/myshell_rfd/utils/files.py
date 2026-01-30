@@ -23,6 +23,22 @@ PLUGINS_DIR = CONFIG_DIR / "plugins"
 PROFILES_DIR = CONFIG_DIR / "profiles"
 SHELL_CONFIG_FILE = CONFIG_DIR / "config"  # ZSH config managed by MyShell_RFD
 
+CONFIG_HEADER = (
+    "# ============================================================\n"
+    "# MyShell_RFD Configuration\n"
+    "# ============================================================\n"
+    "# This file is managed by MyShell_RFD. Do not edit manually!\n"
+    "# Your custom ZSH configuration should remain in ~/.zshrc\n"
+    "#\n"
+    "# To add/remove modules, use:\n"
+    "#   myshell install <module>\n"
+    "#   myshell uninstall <module>\n"
+    "#\n"
+    "# Or launch the TUI:\n"
+    "#   myshell\n"
+    "# ============================================================\n\n"
+)
+
 
 def get_app_dir() -> Path:
     """Get the application data directory, creating if needed."""
@@ -185,21 +201,27 @@ class FileOperations:
         Returns:
             True if content was added, False if already present.
         """
-        # New clean marker format
-        start_marker = f"#### {section_name} ####"
-        # Legacy marker to detect existing installations
-        legacy_start = f"# >>> MyShell_RFD [{section_name}]"
+        # Clean marker format
+        start_marker = f"##### {section_name} #####"
 
-        existing = self.read_file(path) or ""
-
-        # Check if section already exists (check both formats)
-        if start_marker in existing or legacy_start in existing:
+        # Check if file exists and has content
+        existing = self.read_file(path)
+        
+        # If file is empty or missing, start with the header
+        is_new = not existing or not existing.strip()
+        if is_new:
+            from myshell_rfd.utils.files import CONFIG_HEADER
+            existing = CONFIG_HEADER
+            self.write_file(path, existing, backup=backup)
+        
+        # Check if section already exists
+        if start_marker in existing:
             return False
 
         # Build the new section (no end marker needed)
         section = f"\n{start_marker}\n{content.strip()}\n"
 
-        self.append_file(path, section, backup=backup, newline=True)
+        self.append_file(path, section, backup=False, newline=True)
 
         return True
 
@@ -211,8 +233,6 @@ class FileOperations:
         backup: bool = True,
     ) -> bool:
         """Remove a configuration section.
-
-        Supports both new cleaner markers and legacy MyShell_RFD markers.
 
         Args:
             path: The configuration file path.
@@ -228,20 +248,17 @@ class FileOperations:
         if content is None:
             return False
 
-        # Markers to look for
-        new_start = f"#  [{section_name}]"
-        legacy_start = f"# >>> MyShell_RFD [{section_name}]"
-        legacy_end = f"# <<< MyShell_RFD [{section_name}]"
+        # Target marker
+        new_start = f"##### {section_name} #####"
 
-        if new_start not in content and legacy_start not in content:
+        if new_start not in content:
             return False
 
         lines = content.splitlines(keepends=True)
         new_lines: list[str] = []
         skip_line = False
-        
-        # Regex to detect start of ANY new-style section
-        # Used to stop deletion when no end marker is present
+
+        # Regex to detect start of ANY section
         section_start_re = re.compile(r"^#  \[.+\]\s*$")
 
         for line in lines:
@@ -249,31 +266,16 @@ class FileOperations:
             if new_start in line:
                 skip_line = True
                 continue
-            
-            if legacy_start in line:
-                skip_line = True
-                continue
 
             # Check for end of deletion block
             if skip_line:
-                # If we hit a legacy end marker for THIS section, stop skipping after this line
-                if legacy_end in line:
-                    skip_line = False
-                    continue
-                
-                # If we hit the start of ANOTHER new-style section, keep this line and stop skipping
+                # If we hit the start of ANOTHER section, stop skipping
                 if section_start_re.match(line):
                     skip_line = False
                     new_lines.append(line)
                     continue
-                
-                # If we hit a legacy start marker for ANOTHER section, keep and stop skipping
-                if "# >>> MyShell_RFD [" in line:
-                    skip_line = False
-                    new_lines.append(line)
-                    continue
 
-                # Otherwise, we are inside the block to delete, so skip this line
+                # Otherwise, stay in deletion mode
                 continue
 
             # Not in a deletion block, keep the line

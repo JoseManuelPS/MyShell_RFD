@@ -201,7 +201,7 @@ def doctor(
     ] = False,
     change_shell: Annotated[
         bool,
-        typer.Option("--change-shell", help="Change default shell to ZSH if needed"),
+        typer.Option("--change-shell", "-c", help="Change default shell to ZSH if needed"),
     ] = False,
 ) -> None:
     """Check and fix system prerequisites.
@@ -242,7 +242,7 @@ def doctor(
         console.print("\n[green]All prerequisites met![/green]")
         return
 
-    if not fix:
+    if not fix and not change_shell:
         console.print("\n[yellow]Run with --fix to install missing prerequisites[/yellow]")
         if status.zsh_installed and not status.zsh_default:
             console.print("[yellow]Add --change-shell to also set ZSH as default[/yellow]")

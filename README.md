@@ -71,6 +71,9 @@ myshell rollback apply <snapshot-id>
 # Update
 myshell update
 
+# Health check
+myshell doctor
+
 # Clean configuration
 myshell clean
 ```

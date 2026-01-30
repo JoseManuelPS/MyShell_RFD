@@ -18,7 +18,7 @@ from myshell_rfd.utils.logger import get_logger
 from myshell_rfd.utils.process import get_runner
 
 if TYPE_CHECKING:
-    from myshell_rfd.core.module_base import BaseModule, InstallResult
+    from myshell_rfd.core.module_base import InstallResult
     from myshell_rfd.core.rollback import Snapshot
 
 
@@ -50,6 +50,7 @@ class PrerequisiteStatus:
             self.zsh_default,
             self.git_installed,
             self.curl_installed,
+            self.omz_installed,
         ])
 
     @property
@@ -64,6 +65,8 @@ class PrerequisiteStatus:
             issues.append("curl")
         if self.zsh_installed and not self.zsh_default:
             issues.append("zsh not default shell")
+        if not self.omz_installed:
+            issues.append("oh-my-zsh")
         return issues
 
 
@@ -196,6 +199,10 @@ class InstallerService:
         if change_shell and not self._shell.is_zsh_default():
             if not self._shell.set_default_shell():
                 all_fixed = False
+
+        # Ensure Oh My Zsh is installed
+        if not self.ensure_omz():
+            all_fixed = False
 
         # Ensure config is sourced
         self._shell.ensure_config_sourced()
@@ -346,7 +353,7 @@ class InstallerService:
         Returns:
             Dictionary mapping module names to results.
         """
-        results: dict[str, "InstallResult"] = {}
+        results: dict[str, InstallResult] = {}
 
         for module in self._registry.get_available():
             result = self.install_module(module.name, auto_yes=auto_yes)
@@ -394,60 +401,9 @@ class InstallerService:
             [config_file, zshrc],
         )
 
-        # Clean the MyShell config file (remove all module sections)
-        content = self._file_ops.read_file(config_file)
-        if content:
-            # Find and remove all MyShell_RFD sections
-            # Matches legacy: # >>> ... # <<< ...
-            # Matches new: #  [...] ... (until next marker or EOF)
-            
-            # Since we don't have end markers for new sections, we can't easily use a simple regex for everything without risk.
-            # However, we can use the file_ops.remove_from_config logic if we iterate over installed modules.
-            # But clean_config should remove EVERYTHING even unknown modules.
-            
-            # For robust cleaning of the new format without end markers, we might just look for the start lines.
-            lines = content.splitlines(keepends=True)
-            new_lines = []
-            
-            # Keep header
-            header_end_marker = "# ============================================================\n"
-            in_header = True
-            
-            for line in lines:
-                if in_header:
-                    new_lines.append(line)
-                    if line == header_end_marker and len(new_lines) > 5: # simple heaurestic to identify our header
-                         # The header ends with a blank line usually, but let's just stop "header protection" after the separator
-                         pass
-                    # Actually, the header is constant. We can just keep it.
-                    continue
-                
-                # If we encounter a section start, skip it and subsequent lines until we find something that isn't a section content?
-                # Actually, simply wiping the file content after the header is safer and cleaner for "clean_config".
-                # The header is approximately the first 15 lines.
-                pass
-
-            # Simpler approach: If we want to nuke all config, and we control the file, 
-            # and the file is ONLY for myshell config (as we moved it to ~/.myshell_rfd/config),
-            # we can just truncate it to the header!
-            
-            header = (
-                "# ============================================================\n"
-                "# MyShell_RFD Configuration\n"
-                "# ============================================================\n"
-                "# This file is managed by MyShell_RFD. Do not edit manually!\n"
-                "# Your custom ZSH configuration should remain in ~/.zshrc\n"
-                "#\n"
-                "# To add/remove modules, use:\n"
-                "#   myshell install <module>\n"
-                "#   myshell uninstall <module>\n"
-                "#\n"
-                "# Or launch the TUI:\n"
-                "#   myshell\n"
-                "# ============================================================\n\n"
-            )
-            
-            self._file_ops.write_file(config_file, header, backup=False)
+        # Reset the MyShell config file (remove all module sections)
+        from myshell_rfd.utils.files import CONFIG_HEADER
+        self._file_ops.write_file(config_file, CONFIG_HEADER, backup=False)
 
         # Remove the source line from .zshrc
         zshrc_content = self._file_ops.read_file(zshrc)

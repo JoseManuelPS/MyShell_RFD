@@ -210,10 +210,8 @@ class BaseModule(ABC):
         if content is None:
             return False
 
-        legacy_marker = f"# >>> MyShell_RFD [{self.name}]"
-        new_marker = f"#  [{self.name}]"
-        
-        return new_marker in content or legacy_marker in content
+        marker = f"##### {self.name} #####"
+        return marker in content
 
     @abstractmethod
     def install(self, config: "ModuleConfig") -> InstallResult:

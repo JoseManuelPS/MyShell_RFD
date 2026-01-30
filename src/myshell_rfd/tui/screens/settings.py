@@ -76,10 +76,6 @@ class SettingsScreen(Screen[None]):
                     yield Checkbox("Enable debug logging", id="chk-debug")
 
                 with Horizontal(classes="setting-row"):
-                    yield Label("Auto-detect:", classes="setting-label")
-                    yield Checkbox("Auto-detect tools on startup", id="chk-autodetect", value=True)
-
-                with Horizontal(classes="setting-row"):
                     yield Label("Offline mode:", classes="setting-label")
                     yield Checkbox("Use cached resources only", id="chk-offline")
 
@@ -104,7 +100,6 @@ class SettingsScreen(Screen[None]):
 
         # Set checkbox values
         self.query_one("#chk-debug", Checkbox).value = config.debug
-        self.query_one("#chk-autodetect", Checkbox).value = config.auto_detect
         self.query_one("#chk-offline", Checkbox).value = config.offline_mode
 
         # Populate profiles
@@ -140,7 +135,6 @@ class SettingsScreen(Screen[None]):
         config = get_config()
 
         config.debug = self.query_one("#chk-debug", Checkbox).value
-        config.auto_detect = self.query_one("#chk-autodetect", Checkbox).value
         config.offline_mode = self.query_one("#chk-offline", Checkbox).value
 
         save_config()

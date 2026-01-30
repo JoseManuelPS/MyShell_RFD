@@ -184,7 +184,7 @@ class TestNewModule:
 
         module = NewModule()
         result = module.install(config_file)
-
+ 
         assert result.success
         assert module.info.name in config_file.read_text()
 ```
@@ -222,7 +222,7 @@ src/myshell_rfd/
 ├── cli/                 # CLI application (split for agent-friendliness)
 │   ├── __init__.py      # Main Typer app, shared console
 │   ├── main.py          # list, info, update commands
-│   ├── install.py       # install, uninstall, detect, clean commands
+│   ├── install.py       # install, uninstall, doctor, clean commands
 │   ├── profile.py       # profile subcommands
 │   └── rollback.py      # rollback subcommands
 │

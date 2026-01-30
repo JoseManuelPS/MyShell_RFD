@@ -71,11 +71,16 @@ export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'"""
         install_script = self.target_dir / "install"
         if install_script.exists():
             self._logger.info("Running FZF installer...")
+            # Use --all but we will cleanup .zshrc afterwards
             result = self._runner.run(
                 [str(install_script), "--all", "--no-bash", "--no-fish"],
             )
             if not result.success:
                 self._logger.warn(f"FZF installer warning: {result.stderr}")
+
+            # Cleanup .zshrc: the installer adds a source line that we already
+            # handle in ~/.myshell_rfd/config
+            self._cleanup_zshrc()
 
         # Add config
         self._add_config(self.get_config_content(config))
@@ -85,6 +90,30 @@ export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'"""
             message="FZF installed and configured",
             files_created=[str(self.target_dir)],
         )
+
+    def _cleanup_zshrc(self) -> None:
+        """Remove FZF source line from .zshrc if present."""
+        zshrc = Path.home() / ".zshrc"
+        if not zshrc.exists():
+            return
+
+        content = self._file_ops.read_file(zshrc)
+        if not content:
+            return
+
+        # The line added by FZF installer
+        fzf_line = "[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh"
+        
+        if fzf_line in content:
+            self._logger.debug("Removing FZF source line from .zshrc")
+            # Replace the line and any surrounding whitespace/newlines it might have added
+            new_content = content.replace(fzf_line, "")
+            
+            # Clean up potential double or triple newlines left behind
+            import re
+            new_content = re.sub(r'\n\s*\n\s*\n', '\n\n', new_content)
+            
+            self._file_ops.write_file(zshrc, new_content.strip() + "\n", backup=True)
 
 
 class BatcatModule(ConfigOnlyModule):

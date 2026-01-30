@@ -28,7 +28,6 @@ class MyShellApp(App[None]):
         Binding("r", "refresh", "Refresh", show=True),
         Binding("i", "install", "Install"),
         Binding("u", "uninstall", "Uninstall"),
-        Binding("a", "auto_detect", "Auto-detect"),
         Binding("c", "clean", "Clean"),
         Binding("p", "profiles", "Profiles"),
         Binding("s", "settings", "Settings"),
@@ -188,10 +187,6 @@ class MyShellApp(App[None]):
     def action_uninstall(self) -> None:
         """Uninstall selected module."""
         self.query_one(MainScreen).action_uninstall()
-
-    def action_auto_detect(self) -> None:
-        """Run auto-detection."""
-        self.query_one(MainScreen).action_auto_detect()
 
     def action_clean(self) -> None:
         """Clean all configuration."""

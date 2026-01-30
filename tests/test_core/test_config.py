@@ -96,7 +96,6 @@ class TestAppConfig:
 
         assert config.version == "2.0.0"
         assert config.active_profile == "default"
-        assert config.auto_detect is True
         assert config.offline_mode is False
         assert "default" in config.profiles
 

@@ -5,7 +5,7 @@ Practical guide for developing and maintaining MyShell_RFD.
 ## Environment Setup
 
 ```bash
-cd migration
+# cd projects/myshell_rfd
 
 # Create environment with uv
 uv venv
@@ -79,7 +79,7 @@ python scripts/build.py
 # Local build (less portable)
 python scripts/build.py --local
 
-# Binary output: migration/dist/myshell
+# Binary output: dist/myshell
 ```
 
 ## Releases

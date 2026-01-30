@@ -164,7 +164,7 @@ class TestConfigOnlyModule:
 
     def test_install_already_configured(self, module: MockConfigModule):
         """Test installation when already configured."""
-        module._file_ops.read_file.return_value = "# >>> MyShell_RFD [MockConfig]"
+        module._file_ops.read_file.return_value = "##### MockConfig #####"
 
         result = module.install(ModuleConfig())
 
