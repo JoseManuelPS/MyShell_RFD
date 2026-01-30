@@ -98,8 +98,16 @@ class TestBinaryDetector:
         assert isinstance(info.tools, dict)
 
     def test_get_shell_config_file(self, detector: BinaryDetector):
-        """Test getting shell config path."""
+        """Test getting shell config path returns myshell_rfd config."""
+        from myshell_rfd.utils.files import SHELL_CONFIG_FILE
+
         path = detector.get_shell_config_file()
+
+        assert path == SHELL_CONFIG_FILE
+
+    def test_get_zshrc_path(self, detector: BinaryDetector):
+        """Test getting .zshrc path."""
+        path = detector.get_zshrc_path()
 
         assert path == Path.home() / ".zshrc"
 

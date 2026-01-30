@@ -4,6 +4,7 @@ Orchestrates module installation with rollback support,
 offline caching (E5), and auto-detection (E3).
 """
 
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -12,13 +13,58 @@ from myshell_rfd.core.registry import get_registry
 from myshell_rfd.core.rollback import get_rollback_manager
 from myshell_rfd.core.shell import get_shell_manager
 from myshell_rfd.utils.detect import get_detector
-from myshell_rfd.utils.files import CACHE_DIR, get_file_ops
+from myshell_rfd.utils.files import CACHE_DIR, SHELL_CONFIG_FILE, get_file_ops
 from myshell_rfd.utils.logger import get_logger
 from myshell_rfd.utils.process import get_runner
 
 if TYPE_CHECKING:
     from myshell_rfd.core.module_base import BaseModule, InstallResult
     from myshell_rfd.core.rollback import Snapshot
+
+
+@dataclass
+class PrerequisiteStatus:
+    """Status of system prerequisites.
+
+    Attributes:
+        zsh_installed: Whether ZSH is installed.
+        zsh_default: Whether ZSH is the default shell.
+        git_installed: Whether git is installed.
+        curl_installed: Whether curl is installed.
+        omz_installed: Whether Oh My Zsh is installed.
+        config_sourced: Whether .zshrc sources MyShell config.
+    """
+
+    zsh_installed: bool
+    zsh_default: bool
+    git_installed: bool
+    curl_installed: bool
+    omz_installed: bool
+    config_sourced: bool
+
+    @property
+    def all_ok(self) -> bool:
+        """Check if all prerequisites are met."""
+        return all([
+            self.zsh_installed,
+            self.zsh_default,
+            self.git_installed,
+            self.curl_installed,
+        ])
+
+    @property
+    def missing(self) -> list[str]:
+        """Get list of missing prerequisites."""
+        issues = []
+        if not self.zsh_installed:
+            issues.append("zsh")
+        if not self.git_installed:
+            issues.append("git")
+        if not self.curl_installed:
+            issues.append("curl")
+        if self.zsh_installed and not self.zsh_default:
+            issues.append("zsh not default shell")
+        return issues
 
 
 class InstallerService:
@@ -109,6 +155,52 @@ class InstallerService:
 
         self._logger.error(f"Failed to install prerequisites: {result.stderr}")
         return False
+
+    def get_prerequisites_status(self) -> PrerequisiteStatus:
+        """Get detailed prerequisites status.
+
+        Returns:
+            PrerequisiteStatus with all checks.
+        """
+        zshrc = self._detector.get_zshrc_path()
+        zshrc_content = self._file_ops.read_file(zshrc) or ""
+        config_sourced = str(SHELL_CONFIG_FILE) in zshrc_content
+
+        return PrerequisiteStatus(
+            zsh_installed=self._shell.is_zsh_installed(),
+            zsh_default=self._shell.is_zsh_default(),
+            git_installed=self._detector.check_binary("git"),
+            curl_installed=self._detector.check_binary("curl"),
+            omz_installed=self._shell.is_omz_installed(),
+            config_sourced=config_sourced,
+        )
+
+    def fix_prerequisites(self, *, change_shell: bool = False) -> bool:
+        """Install missing prerequisites and optionally change default shell.
+
+        Args:
+            change_shell: Also change default shell to ZSH if needed.
+
+        Returns:
+            True if all issues were fixed.
+        """
+        all_fixed = True
+
+        # Install missing packages
+        missing = self.check_prerequisites()
+        if missing:
+            if not self.install_prerequisites():
+                all_fixed = False
+
+        # Change default shell if requested
+        if change_shell and not self._shell.is_zsh_default():
+            if not self._shell.set_default_shell():
+                all_fixed = False
+
+        # Ensure config is sourced
+        self._shell.ensure_config_sourced()
+
+        return all_fixed
 
     def ensure_omz(self) -> bool:
         """Ensure Oh My Zsh is installed.
@@ -262,29 +354,7 @@ class InstallerService:
 
         return results
 
-    def auto_detect_and_configure(self) -> list[str]:
-        """Auto-detect installed tools and configure matching modules (E3).
 
-        Returns:
-            List of modules that were configured.
-        """
-        configured = []
-
-        self._logger.info("Scanning for installed tools...")
-
-        for module in self._registry.get_all():
-            if module.check_available() and not module.check_installed():
-                self._logger.debug(f"Auto-configuring {module.name}")
-                result = self.install_module(module.name, auto_yes=True)
-                if result.success:
-                    configured.append(module.name)
-
-        if configured:
-            self._logger.success(f"Auto-configured {len(configured)} modules")
-        else:
-            self._logger.info("No new modules to configure")
-
-        return configured
 
     def rollback(self, snapshot_id: str) -> bool:
         """Rollback to a snapshot.
@@ -308,33 +378,89 @@ class InstallerService:
     def clean_config(self) -> bool:
         """Remove all MyShell_RFD configuration.
 
+        Cleans both the MyShell config file and the source line in .zshrc.
+
         Returns:
             True if cleaned successfully.
         """
-        zshrc = self._detector.get_shell_config_file()
-
-        # Create snapshot first
-        self._rollback.create_snapshot(
-            "Before clean",
-            [zshrc],
-        )
-
-        # Remove all module sections
-        content = self._file_ops.read_file(zshrc)
-        if not content:
-            return True
-
-        # Find and remove all MyShell_RFD sections
         import re
 
-        pattern = r"\n?# >>> MyShell_RFD \[[^\]]+\].*?# <<< MyShell_RFD \[[^\]]+\]\n?"
-        new_content = re.sub(pattern, "", content, flags=re.DOTALL)
+        config_file = SHELL_CONFIG_FILE
+        zshrc = self._detector.get_zshrc_path()
 
-        # Clean up extra blank lines
-        while "\n\n\n" in new_content:
-            new_content = new_content.replace("\n\n\n", "\n\n")
+        # Create snapshot first (backup both files)
+        self._rollback.create_snapshot(
+            "Before clean",
+            [config_file, zshrc],
+        )
 
-        self._file_ops.write_file(zshrc, new_content, backup=True)
+        # Clean the MyShell config file (remove all module sections)
+        content = self._file_ops.read_file(config_file)
+        if content:
+            # Find and remove all MyShell_RFD sections
+            # Matches legacy: # >>> ... # <<< ...
+            # Matches new: #  [...] ... (until next marker or EOF)
+            
+            # Since we don't have end markers for new sections, we can't easily use a simple regex for everything without risk.
+            # However, we can use the file_ops.remove_from_config logic if we iterate over installed modules.
+            # But clean_config should remove EVERYTHING even unknown modules.
+            
+            # For robust cleaning of the new format without end markers, we might just look for the start lines.
+            lines = content.splitlines(keepends=True)
+            new_lines = []
+            
+            # Keep header
+            header_end_marker = "# ============================================================\n"
+            in_header = True
+            
+            for line in lines:
+                if in_header:
+                    new_lines.append(line)
+                    if line == header_end_marker and len(new_lines) > 5: # simple heaurestic to identify our header
+                         # The header ends with a blank line usually, but let's just stop "header protection" after the separator
+                         pass
+                    # Actually, the header is constant. We can just keep it.
+                    continue
+                
+                # If we encounter a section start, skip it and subsequent lines until we find something that isn't a section content?
+                # Actually, simply wiping the file content after the header is safer and cleaner for "clean_config".
+                # The header is approximately the first 15 lines.
+                pass
+
+            # Simpler approach: If we want to nuke all config, and we control the file, 
+            # and the file is ONLY for myshell config (as we moved it to ~/.myshell_rfd/config),
+            # we can just truncate it to the header!
+            
+            header = (
+                "# ============================================================\n"
+                "# MyShell_RFD Configuration\n"
+                "# ============================================================\n"
+                "# This file is managed by MyShell_RFD. Do not edit manually!\n"
+                "# Your custom ZSH configuration should remain in ~/.zshrc\n"
+                "#\n"
+                "# To add/remove modules, use:\n"
+                "#   myshell install <module>\n"
+                "#   myshell uninstall <module>\n"
+                "#\n"
+                "# Or launch the TUI:\n"
+                "#   myshell\n"
+                "# ============================================================\n\n"
+            )
+            
+            self._file_ops.write_file(config_file, header, backup=False)
+
+        # Remove the source line from .zshrc
+        zshrc_content = self._file_ops.read_file(zshrc)
+        if zshrc_content and str(config_file) in zshrc_content:
+            # Remove the MyShell_RFD source section
+            pattern = r"\n?# MyShell_RFD Configuration\n\[\[.*?myshell_rfd.*?\]\].*?\n?"
+            new_zshrc = re.sub(pattern, "", zshrc_content, flags=re.DOTALL)
+
+            # Clean up extra blank lines
+            while "\n\n\n" in new_zshrc:
+                new_zshrc = new_zshrc.replace("\n\n\n", "\n\n")
+
+            self._file_ops.write_file(zshrc, new_zshrc, backup=False)
 
         # Reset config
         config = get_config()

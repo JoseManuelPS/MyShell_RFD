@@ -1,3 +1,0 @@
-- La configuración generada por myshell, no debe estar dentro de .zshrc, sino en un archivo ~/.myshell_rfd/config. En ~/.zshrc solo debe estar la carga de dicho archivo.
-- Hay que comprobar siempre, que los prerequisitos se cumplen antes de ejecutar la app. Tanto en CLI como en TUI.
-- Hay que agregar un comando prerequisites. Para comprobar y solucionar que los prerequisitos están cumplidos. ZSH y GIT.

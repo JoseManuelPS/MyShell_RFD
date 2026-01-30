@@ -21,6 +21,7 @@ BACKUP_DIR = CONFIG_DIR / "backups"
 CACHE_DIR = CONFIG_DIR / "cache"
 PLUGINS_DIR = CONFIG_DIR / "plugins"
 PROFILES_DIR = CONFIG_DIR / "profiles"
+SHELL_CONFIG_FILE = CONFIG_DIR / "config"  # ZSH config managed by MyShell_RFD
 
 
 def get_app_dir() -> Path:
@@ -172,7 +173,7 @@ class FileOperations:
     ) -> bool:
         """Add a configuration section if not already present.
 
-        Implements idempotent configuration addition like add_to_config() in utils.sh.
+        Implements idempotent configuration addition.
         Uses markers to identify sections and prevent duplicates.
 
         Args:
@@ -184,17 +185,19 @@ class FileOperations:
         Returns:
             True if content was added, False if already present.
         """
-        start_marker = f"# >>> MyShell_RFD [{section_name}]"
-        end_marker = f"# <<< MyShell_RFD [{section_name}]"
+        # New clean marker format
+        start_marker = f"#### {section_name} ####"
+        # Legacy marker to detect existing installations
+        legacy_start = f"# >>> MyShell_RFD [{section_name}]"
 
         existing = self.read_file(path) or ""
 
-        # Check if section already exists
-        if start_marker in existing:
+        # Check if section already exists (check both formats)
+        if start_marker in existing or legacy_start in existing:
             return False
 
-        # Build the new section
-        section = f"\n{start_marker}\n{content.strip()}\n{end_marker}\n"
+        # Build the new section (no end marker needed)
+        section = f"\n{start_marker}\n{content.strip()}\n"
 
         self.append_file(path, section, backup=backup, newline=True)
 
@@ -209,6 +212,8 @@ class FileOperations:
     ) -> bool:
         """Remove a configuration section.
 
+        Supports both new cleaner markers and legacy MyShell_RFD markers.
+
         Args:
             path: The configuration file path.
             section_name: The section identifier.
@@ -217,27 +222,62 @@ class FileOperations:
         Returns:
             True if section was removed, False if not found.
         """
-        start_marker = f"# >>> MyShell_RFD [{section_name}]"
-        end_marker = f"# <<< MyShell_RFD [{section_name}]"
+        import re
 
         content = self.read_file(path)
-        if content is None or start_marker not in content:
+        if content is None:
             return False
 
-        # Find and remove the section
+        # Markers to look for
+        new_start = f"#  [{section_name}]"
+        legacy_start = f"# >>> MyShell_RFD [{section_name}]"
+        legacy_end = f"# <<< MyShell_RFD [{section_name}]"
+
+        if new_start not in content and legacy_start not in content:
+            return False
+
         lines = content.splitlines(keepends=True)
         new_lines: list[str] = []
-        in_section = False
+        skip_line = False
+        
+        # Regex to detect start of ANY new-style section
+        # Used to stop deletion when no end marker is present
+        section_start_re = re.compile(r"^#  \[.+\]\s*$")
 
         for line in lines:
-            if start_marker in line:
-                in_section = True
+            # Check for start of the target section
+            if new_start in line:
+                skip_line = True
                 continue
-            if end_marker in line:
-                in_section = False
+            
+            if legacy_start in line:
+                skip_line = True
                 continue
-            if not in_section:
-                new_lines.append(line)
+
+            # Check for end of deletion block
+            if skip_line:
+                # If we hit a legacy end marker for THIS section, stop skipping after this line
+                if legacy_end in line:
+                    skip_line = False
+                    continue
+                
+                # If we hit the start of ANOTHER new-style section, keep this line and stop skipping
+                if section_start_re.match(line):
+                    skip_line = False
+                    new_lines.append(line)
+                    continue
+                
+                # If we hit a legacy start marker for ANOTHER section, keep and stop skipping
+                if "# >>> MyShell_RFD [" in line:
+                    skip_line = False
+                    new_lines.append(line)
+                    continue
+
+                # Otherwise, we are inside the block to delete, so skip this line
+                continue
+
+            # Not in a deletion block, keep the line
+            new_lines.append(line)
 
         new_content = "".join(new_lines)
 

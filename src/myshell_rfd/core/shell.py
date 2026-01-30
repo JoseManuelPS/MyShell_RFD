@@ -242,7 +242,8 @@ class ShellManager:
         Returns:
             True if source line exists or was added.
         """
-        content = self._file_ops.read_file(self.zshrc_path)
+        zshrc = self._detector.get_zshrc_path()
+        content = self._file_ops.read_file(zshrc)
         if not content:
             content = ""
 
@@ -253,13 +254,76 @@ class ShellManager:
 
         # Add source line at the end
         self._file_ops.append_file(
-            self.zshrc_path,
+            zshrc,
             f"\n# MyShell_RFD Configuration\n{source_line}\n",
             backup=True,
         )
 
         self._logger.success("Added MyShell_RFD source line to .zshrc")
         return True
+
+    def ensure_config_sourced(self) -> bool:
+        """Ensure .zshrc sources the MyShell_RFD config file.
+
+        Creates the config file if needed and adds source line to .zshrc.
+
+        Returns:
+            True if setup is complete.
+        """
+        from myshell_rfd.utils.files import CONFIG_DIR, SHELL_CONFIG_FILE
+
+        # Ensure config directory exists
+        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+
+        # Create config file if it doesn't exist
+        if not SHELL_CONFIG_FILE.exists():
+            header = (
+                "# ============================================================\n"
+                "# MyShell_RFD Configuration\n"
+                "# ============================================================\n"
+                "# This file is managed by MyShell_RFD. Do not edit manually!\n"
+                "# Your custom ZSH configuration should remain in ~/.zshrc\n"
+                "#\n"
+                "# To add/remove modules, use:\n"
+                "#   myshell install <module>\n"
+                "#   myshell uninstall <module>\n"
+                "#\n"
+                "# Or launch the TUI:\n"
+                "#   myshell\n"
+                "# ============================================================\n\n"
+            )
+            SHELL_CONFIG_FILE.write_text(header, encoding="utf-8")
+
+        # Add source line to .zshrc
+        return self.ensure_source_line(SHELL_CONFIG_FILE)
+
+    def set_default_shell(self) -> bool:
+        """Set ZSH as the default shell.
+
+        Uses chsh command which requires user password.
+
+        Returns:
+            True if shell was changed successfully.
+        """
+        if self.is_zsh_default():
+            self._logger.info("ZSH is already the default shell")
+            return True
+
+        zsh_path = self._detector.get_binary_path("zsh")
+        if not zsh_path:
+            self._logger.error("ZSH not found in PATH")
+            return False
+
+        self._logger.info(f"Changing default shell to ZSH ({zsh_path})...")
+        # Run interactively to allow password entry
+        result = self._runner.run(f"chsh -s {zsh_path}", shell=True, capture=False)
+
+        if result.success:
+            self._logger.success("Default shell changed to ZSH. Restart your terminal.")
+            return True
+
+        self._logger.error(f"Failed to change shell: {result.stderr}")
+        return False
 
     def install_zsh_plugin(
         self,

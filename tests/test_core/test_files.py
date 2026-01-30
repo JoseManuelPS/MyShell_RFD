@@ -99,9 +99,10 @@ class TestFileOperations:
 
         assert result is True
         content = config_file.read_text()
-        assert "# >>> MyShell_RFD [TestModule]" in content
+        assert "#  [TestModule]" in content
         assert "alias test='echo test'" in content
-        assert "# <<< MyShell_RFD [TestModule]" in content
+        # Ensure no end marker is written
+        assert "# <<< MyShell_RFD" not in content
 
     def test_add_to_config_duplicate(self, file_ops: FileOperations, temp_dir: Path):
         """Test adding duplicate section returns False."""
@@ -123,8 +124,26 @@ class TestFileOperations:
 
         assert result is True
         content = config_file.read_text()
-        assert "# >>> MyShell_RFD [TestModule]" not in content
+        assert "#  [TestModule]" not in content
         assert "content" not in content
+
+    def test_remove_from_config_legacy(self, file_ops: FileOperations, temp_dir: Path):
+        """Test removing legacy config section."""
+        config_file = temp_dir / "config"
+        content = (
+            "# existing\n"
+            "# >>> MyShell_RFD [TestModule]\n"
+            "legacy content\n"
+            "# <<< MyShell_RFD [TestModule]\n"
+        )
+        config_file.write_text(content)
+
+        result = file_ops.remove_from_config(config_file, "TestModule", backup=False)
+
+        assert result is True
+        content = config_file.read_text()
+        assert "TestModule" not in content
+        assert "legacy content" not in content
 
     def test_remove_nonexistent_section(self, file_ops: FileOperations, temp_dir: Path):
         """Test removing nonexistent section returns False."""

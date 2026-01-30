@@ -299,8 +299,23 @@ class BinaryDetector:
     def get_shell_config_file(self) -> Path:
         """Get the ZSH configuration file path.
 
+        Returns the MyShell_RFD managed config file path.
+        Modules should write their configuration here instead of .zshrc.
+
         Returns:
-            Path to .zshrc.
+            Path to ~/.myshell_rfd/config.
+        """
+        from myshell_rfd.utils.files import SHELL_CONFIG_FILE
+
+        return SHELL_CONFIG_FILE
+
+    def get_zshrc_path(self) -> Path:
+        """Get the path to .zshrc.
+
+        Use this when you need to access .zshrc directly (e.g., for source lines).
+
+        Returns:
+            Path to user's .zshrc file.
         """
         return Path.home() / ".zshrc"
 

@@ -151,6 +151,22 @@ class MyShellApp(App[None]):
         yield MainScreen()
         yield Footer()
 
+    def on_mount(self) -> None:
+        """Check prerequisites on app startup."""
+        from myshell_rfd.core.installer import get_installer
+
+        installer = get_installer()
+        status = installer.get_prerequisites_status()
+
+        if not status.all_ok:
+            missing = ", ".join(status.missing)
+            self.notify(
+                f"Missing prerequisites: {missing}\nRun 'myshell doctor --fix' to resolve.",
+                title="Prerequisites Warning",
+                severity="warning",
+                timeout=10,
+            )
+
     def action_toggle_dark(self) -> None:
         """Toggle dark/light theme."""
         self.dark = not self.dark
