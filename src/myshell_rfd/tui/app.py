@@ -93,9 +93,14 @@ class MyShellApp(App[None]):
 
     #sidebar {
         width: 30;
-        dock: left;
+        dock: right;
         background: $panel;
-        border-right: solid $primary;
+        border-left: solid $primary;
+    }
+
+    #categories-list {
+        height: 1fr;
+        margin: 1;
     }
 
     #content {
@@ -118,13 +123,6 @@ class MyShellApp(App[None]):
     DataTable > .datatable--header {
         text-style: bold;
         background: $primary;
-    }
-
-    .button-bar {
-        dock: bottom;
-        height: 3;
-        padding: 1;
-        background: $panel;
     }
 
     Button {

@@ -56,12 +56,6 @@ class SettingsScreen(Screen[None]):
         height: 10;
         margin: 1;
     }
-
-    #settings-buttons {
-        dock: bottom;
-        height: 3;
-        padding: 1;
-    }
     """
 
     def compose(self) -> ComposeResult:
@@ -89,11 +83,6 @@ class SettingsScreen(Screen[None]):
                     yield Button("Delete", id="btn-delete-profile", variant="error")
                     yield Button("Switch", id="btn-switch-profile", variant="default")
 
-            # Action buttons
-            with Horizontal(id="settings-buttons"):
-                yield Button("Save", id="btn-save", variant="success")
-                yield Button("Back", id="btn-back", variant="default")
-
     def on_mount(self) -> None:
         """Load current settings."""
         config = get_config()
@@ -119,11 +108,7 @@ class SettingsScreen(Screen[None]):
         """Handle button presses."""
         button_id = event.button.id
 
-        if button_id == "btn-save":
-            self.action_save()
-        elif button_id == "btn-back":
-            self.action_back()
-        elif button_id == "btn-new-profile":
+        if button_id == "btn-new-profile":
             self._create_profile()
         elif button_id == "btn-delete-profile":
             self._delete_profile()

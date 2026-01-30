@@ -1,8 +1,9 @@
 """Main screen for MyShell_RFD TUI."""
 
 from textual.app import ComposeResult
-from textual.containers import Container, Horizontal, Vertical
-from textual.widgets import Button, DataTable, Label
+from textual.containers import Container, Vertical
+from textual.widgets import DataTable, Label, OptionList
+from textual.widgets.option_list import Option
 
 from myshell_rfd.core.registry import init_registry
 
@@ -19,30 +20,30 @@ class MainScreen(Container):
             # Sidebar with categories
             with Vertical(id="sidebar"):
                 yield Label("Categories", classes="category-header")
-                yield Button("All Modules", id="cat-all", classes="primary")
-                yield Button("Shell", id="cat-shell")
-                yield Button("Containers", id="cat-container")
-                yield Button("Kubernetes", id="cat-kubernetes")
-                yield Button("Cloud", id="cat-cloud")
-                yield Button("VCS", id="cat-vcs")
-                yield Button("Tools", id="cat-tools")
-                yield Button("Themes", id="cat-theme")
+                yield OptionList(id="categories-list")
 
             # Main content
             with Vertical(id="content"):
                 yield Label("Modules", classes="category-header")
                 yield DataTable(id="modules-table")
 
-                # Action buttons
-                with Horizontal(classes="button-bar"):
-                    yield Button("Install Selected", id="btn-install", variant="success")
-                    yield Button("Uninstall", id="btn-uninstall", variant="warning")
-                    yield Button("Clean All", id="btn-clean", variant="error")
-
     def on_mount(self) -> None:
         """Initialize the screen."""
         self._registry = init_registry()
         self._current_category: str | None = None
+
+        # Setup categories list
+        categories_list = self.query_one("#categories-list", OptionList)
+        categories_list.add_option(Option("All Modules", id="all"))
+        categories_list.add_option(Option("Shell", id="shell"))
+        categories_list.add_option(Option("Containers", id="container"))
+        categories_list.add_option(Option("Kubernetes", id="kubernetes"))
+        categories_list.add_option(Option("Cloud", id="cloud"))
+        categories_list.add_option(Option("VCS", id="vcs"))
+        categories_list.add_option(Option("Tools", id="tools"))
+        categories_list.add_option(Option("Themes", id="theme"))
+        # Select "All Modules" by default
+        categories_list.highlighted = 0
 
         # Setup table
         table = self.query_one("#modules-table", DataTable)
@@ -50,6 +51,9 @@ class MainScreen(Container):
         table.cursor_type = "row"
 
         self.refresh_modules()
+
+        # Set focus on the modules table by default
+        table.focus()
 
     def refresh_modules(self, category: str | None = None) -> None:
         """Refresh the modules table.
@@ -83,22 +87,13 @@ class MainScreen(Container):
                 key=module.name,
             )
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        """Handle button presses."""
-        button_id = event.button.id
-
-        if button_id == "btn-install":
-            self.action_install()
-        elif button_id == "btn-uninstall":
-            self.action_uninstall()
-        elif button_id == "btn-clean":
-            self.action_clean()
-        elif button_id and button_id.startswith("cat-"):
-            category = button_id[4:]
-            if category == "all":
-                self.refresh_modules()
-            else:
-                self.refresh_modules(category)
+    def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
+        """Handle category selection."""
+        category_id = str(event.option.id)
+        if category_id == "all":
+            self.refresh_modules()
+        else:
+            self.refresh_modules(category_id)
 
     def action_install(self) -> None:
         """Install selected module."""
