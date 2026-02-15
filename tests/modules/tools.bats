@@ -21,7 +21,9 @@ setup() {
     lecho() { :; }
     print_header() { :; }
     
-    source "$PROJECT_ROOT/src/modules/tools.sh"
+    source "$PROJECT_ROOT/src/modules/batcat.sh"
+    source "$PROJECT_ROOT/src/modules/pls.sh"
+    source "$PROJECT_ROOT/src/modules/python.sh"
 }
 
 teardown() {
@@ -37,7 +39,7 @@ teardown() {
     
     run configure_batcat
     
-    grep "alias cat='batcat'" "$SCRIPT_CONFIG_FILE"
+    grep "alias bat='batcat'" "$SCRIPT_CONFIG_FILE"
 }
 
 @test "configure_batcat leverages bat if batcat missing" {
@@ -52,7 +54,7 @@ teardown() {
     
     run configure_batcat
     
-    grep "alias cat='bat'" "$SCRIPT_CONFIG_FILE"
+    grep "alias bat='bat'" "$SCRIPT_CONFIG_FILE"
 }
 
 @test "configure_pls adds sudo alias" {

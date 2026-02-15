@@ -45,6 +45,9 @@ teardown() {
     export RESPONSE="y"
     run configure_terraform
     grep "alias t='terraform'" "$SCRIPT_CONFIG_FILE"
+    grep "alias ti='terraform init'" "$SCRIPT_CONFIG_FILE"
+    grep "alias tp='terraform plan'" "$SCRIPT_CONFIG_FILE"
+    grep "alias ta='terraform apply'" "$SCRIPT_CONFIG_FILE"
     grep "complete -o nospace -C /usr/local/bin/terraform terraform" "$SCRIPT_CONFIG_FILE"
 }
 
@@ -53,6 +56,14 @@ teardown() {
     export RESPONSE="y"
     run configure_opentofu
     grep "alias ot='opentofu'" "$SCRIPT_CONFIG_FILE"
+    grep "alias oti='opentofu init'" "$SCRIPT_CONFIG_FILE"
+    grep "alias otp='opentofu plan'" "$SCRIPT_CONFIG_FILE"
+    grep "alias ota='opentofu apply'" "$SCRIPT_CONFIG_FILE"
+    grep "alias otd='opentofu destroy'" "$SCRIPT_CONFIG_FILE"
+    grep "alias otv='opentofu validate'" "$SCRIPT_CONFIG_FILE"
+    grep "alias otfmt='opentofu fmt'" "$SCRIPT_CONFIG_FILE"
+    grep "alias oto='opentofu output'" "$SCRIPT_CONFIG_FILE"
+    grep "alias ots='opentofu state'" "$SCRIPT_CONFIG_FILE"
     grep "complete -o nospace -C /usr/local/bin/opentofu opentofu" "$SCRIPT_CONFIG_FILE"
 }
 
