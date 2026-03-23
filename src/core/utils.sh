@@ -54,12 +54,12 @@ add_to_config() {
     local section="$1"
     local content="$2"
 
-    if grep -q "## Section: $section" "$SCRIPT_CONFIG_FILE"; then
+    if grep -q "^## $section$" "$SCRIPT_CONFIG_FILE"; then
         lecho "DEBUG" "Section $section already exists in config."
         return
     fi
 
-    echo "## Section: $section" >> "$SCRIPT_CONFIG_FILE"
+    echo "## $section" >> "$SCRIPT_CONFIG_FILE"
     echo "$content" >> "$SCRIPT_CONFIG_FILE"
     echo "" >> "$SCRIPT_CONFIG_FILE"
 }

@@ -8,7 +8,7 @@ configure_rosa() {
         print_header "Rosa Configuration"
         
         if prompt_yes_no "Enable Rosa autocompletion?" "y"; then
-            local config_content="source <(rosa completion zsh)"
+            local config_content="source <(rosa completion zsh 2>/dev/null)"
             add_to_config "Rosa" "$config_content"
             lecho "SUCCESS" "Rosa autocompletion configured."
         else

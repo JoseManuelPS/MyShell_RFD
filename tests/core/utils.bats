@@ -62,7 +62,7 @@ teardown() {
     run add_to_config "TEST_SECTION" "key=value"
     
     [ "$status" -eq 0 ]
-    grep "## Section: TEST_SECTION" "$SCRIPT_CONFIG_FILE"
+    grep "^## TEST_SECTION$" "$SCRIPT_CONFIG_FILE"
     grep "key=value" "$SCRIPT_CONFIG_FILE"
 }
 
@@ -74,7 +74,7 @@ teardown() {
     [ "$status" -eq 0 ]
     
     # Count occurrences of section header
-    local count=$(grep -c "## Section: TEST_SECTION" "$SCRIPT_CONFIG_FILE")
+    local count=$(grep -c "^## TEST_SECTION$" "$SCRIPT_CONFIG_FILE")
     [ "$count" -eq 1 ]
 }
 

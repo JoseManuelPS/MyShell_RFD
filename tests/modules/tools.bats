@@ -63,7 +63,7 @@ teardown() {
     
     run configure_pls
     
-    grep "## Section: PLS" "$SCRIPT_CONFIG_FILE"
+    grep "^## PLS$" "$SCRIPT_CONFIG_FILE"
     grep "function pls() { sudo" "$SCRIPT_CONFIG_FILE"
 }
 
