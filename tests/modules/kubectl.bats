@@ -55,7 +55,7 @@ teardown() {
     run configure_kubectl
     
     [ -f "$SCRIPT_CONFIG_FILE" ]
-    run grep "## Section: Kubectl" "$SCRIPT_CONFIG_FILE"
+    run grep "^## Kubectl$" "$SCRIPT_CONFIG_FILE"
     [ "$status" -eq 0 ]
     run grep "alias k=kubectl" "$SCRIPT_CONFIG_FILE"
     [ "$status" -eq 0 ]
@@ -95,7 +95,7 @@ teardown() {
     assert_command_called "curl"
     
     # Check if config was updated with krew path
-    run grep "## Section: Krew" "$SCRIPT_CONFIG_FILE"
+    run grep "^## Krew$" "$SCRIPT_CONFIG_FILE"
     [ "$status" -eq 0 ]
 
     # Verify plugins were installed individually
