@@ -4,6 +4,11 @@ All notable changes relevant to users, reviewers, or distribution are documented
 
 This project follows Semantic Versioning.
 
+## v1.2.1 - 2026-03-23
+
+### Fixed
+- Use dynamic path for Terraform autocompletion binary.
+
 ## v1.2.0 - 2026-03-23
 
 ### Added
