@@ -11,7 +11,7 @@ configure_terraform() {
         if prompt_yes_no "Enable Terraform autocompletion and aliases?" "y"; then
             read -r -d '' config_content << EOM
 autoload -U +X bashcompinit && bashcompinit
-complete -o nospace -C /usr/local/bin/terraform terraform
+complete -o nospace -C terraform terraform
 alias t='terraform'
 alias ti='terraform init'
 alias tp='terraform plan'
