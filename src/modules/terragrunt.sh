@@ -8,7 +8,7 @@ configure_terragrunt() {
         print_header "Terragrunt Configuration"
         
         if prompt_yes_no "Enable Terragrunt autocompletion?" "y"; then
-            local config_content="autoload -U +X bashcompinit && bashcompinit\ncomplete -o nospace -C /usr/local/bin/terragrunt terragrunt"
+            local config_content="autoload -U +X bashcompinit && bashcompinit; complete -o nospace -C /usr/local/bin/terragrunt terragrunt"
             add_to_config "Terragrunt" "$config_content"
             lecho "SUCCESS" "Terragrunt autocompletion configured."
         else

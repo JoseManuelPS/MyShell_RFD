@@ -25,6 +25,7 @@ setup() {
     source "$PROJECT_ROOT/src/modules/aws.sh"
     source "$PROJECT_ROOT/src/modules/terraform.sh"
     source "$PROJECT_ROOT/src/modules/helm.sh"
+    source "$PROJECT_ROOT/src/modules/terragrunt.sh"
 }
 
 teardown() {
@@ -48,7 +49,7 @@ teardown() {
     grep "alias ti='terraform init'" "$SCRIPT_CONFIG_FILE"
     grep "alias tp='terraform plan'" "$SCRIPT_CONFIG_FILE"
     grep "alias ta='terraform apply'" "$SCRIPT_CONFIG_FILE"
-    grep "complete -o nospace -C /usr/local/bin/terraform terraform" "$SCRIPT_CONFIG_FILE"
+    grep "complete -o nospace -C terraform terraform" "$SCRIPT_CONFIG_FILE"
 }
 
 @test "configure_opentofu adds completion and alias" {
@@ -72,4 +73,40 @@ teardown() {
     export RESPONSE="y"
     run configure_helm
     grep "source <(helm completion zsh)" "$SCRIPT_CONFIG_FILE"
+}
+
+@test "configure_aws skips when binary missing" {
+    run configure_aws
+    [ ! -f "$SCRIPT_CONFIG_FILE" ]
+}
+
+@test "configure_terraform skips when binary missing" {
+    run configure_terraform
+    [ ! -f "$SCRIPT_CONFIG_FILE" ]
+}
+
+@test "configure_terraform skips when user declines" {
+    mock_command "terraform" "echo 1"
+    export RESPONSE="n"
+    run configure_terraform
+    [ ! -f "$SCRIPT_CONFIG_FILE" ]
+}
+
+@test "configure_terragrunt adds completion if approved" {
+    mock_command "terragrunt" "echo 1"
+    export RESPONSE="y"
+    run configure_terragrunt
+    grep "complete -o nospace -C /usr/local/bin/terragrunt terragrunt" "$SCRIPT_CONFIG_FILE"
+}
+
+@test "configure_terragrunt skips when binary missing" {
+    run configure_terragrunt
+    [ ! -f "$SCRIPT_CONFIG_FILE" ]
+}
+
+@test "configure_terragrunt skips when user declines" {
+    mock_command "terragrunt" "echo 1"
+    export RESPONSE="n"
+    run configure_terragrunt
+    [ ! -f "$SCRIPT_CONFIG_FILE" ]
 }

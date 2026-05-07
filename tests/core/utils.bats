@@ -8,14 +8,14 @@ setup() {
     export OLD_HOME="$HOME"
     export HOME="$BATS_TMPDIR/fake_home"
     mkdir -p "$HOME"
-    
+
     # We need to source the file AFTER setting HOME because it sets variables based on HOME at top level
     source "$PROJECT_ROOT/src/core/utils.sh"
-    
-    # Needs lecho to be defined or mocked, as utils.sh calls it
-    # We can mock lecho
-    lecho() {
-        echo "$1: $2"
+
+    lecho() { :; }
+    print_header() { :; }
+    prompt_yes_no() {
+        if [ "$RESPONSE" == "y" ]; then return 0; else return 1; fi
     }
 }
 
@@ -92,8 +92,63 @@ teardown() {
 @test "enable_omz_plugin patches .zshrc" {
     local zshrc="$HOME/.zshrc"
     echo "plugins=(git)" > "$zshrc"
-    
+
     run enable_omz_plugin "docker"
     [ "$status" -eq 0 ]
     grep "plugins=(git docker)" "$zshrc"
+}
+
+@test "enable_omz_plugin is idempotent" {
+    local zshrc="$HOME/.zshrc"
+    echo "plugins=(git docker)" > "$zshrc"
+
+    run enable_omz_plugin "docker"
+    [ "$status" -eq 0 ]
+    local count
+    count=$(grep -c "docker" "$zshrc")
+    [ "$count" -eq 1 ]
+}
+
+@test "ensure_zshrc_source adds source line when missing" {
+    init_config
+    local zshrc="$HOME/.zshrc"
+    touch "$zshrc"
+
+    run ensure_zshrc_source
+    [ "$status" -eq 0 ]
+    grep "$SCRIPT_CONFIG_FILE" "$zshrc"
+}
+
+@test "ensure_zshrc_source is idempotent" {
+    init_config
+    local zshrc="$HOME/.zshrc"
+    touch "$zshrc"
+
+    ensure_zshrc_source
+    ensure_zshrc_source
+
+    local count
+    count=$(grep -c "$SCRIPT_CONFIG_FILE" "$zshrc")
+    [ "$count" -eq 1 ]
+}
+
+@test "clean_config deletes config when confirmed" {
+    init_config
+    export RESPONSE="y"
+
+    run clean_config
+    [ "$status" -eq 0 ]
+    [ ! -f "$SCRIPT_CONFIG_FILE" ]
+    local count
+    count=$(ls "$SCRIPT_BACKUP_DIR" | wc -l)
+    [ "$count" -ge 1 ]
+}
+
+@test "clean_config skips deletion when denied" {
+    init_config
+    export RESPONSE="n"
+
+    run clean_config
+    [ "$status" -eq 0 ]
+    [ -f "$SCRIPT_CONFIG_FILE" ]
 }

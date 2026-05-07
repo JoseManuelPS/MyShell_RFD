@@ -22,6 +22,7 @@ setup() {
     print_header() { :; }
     
     source "$PROJECT_ROOT/src/modules/batcat.sh"
+    source "$PROJECT_ROOT/src/modules/claude.sh"
     source "$PROJECT_ROOT/src/modules/pls.sh"
     source "$PROJECT_ROOT/src/modules/python.sh"
 }
@@ -103,4 +104,34 @@ teardown() {
     
     # Should find it and just add config, no create
     grep "source $HOME/.py-venv-default/bin/activate" "$SCRIPT_CONFIG_FILE"
+}
+
+@test "configure_claude adds PATH export when binary exists and approved" {
+    mkdir -p "$HOME/.local/bin"
+    touch "$HOME/.local/bin/claude"
+    export RESPONSE="y"
+
+    run configure_claude
+
+    grep 'export PATH="$HOME/.local/bin:$PATH"' "$SCRIPT_CONFIG_FILE"
+}
+
+@test "configure_claude skips config when binary is absent" {
+    # Ensure binary does not exist
+    rm -f "$HOME/.local/bin/claude"
+    export RESPONSE="y"
+
+    run configure_claude
+
+    ! grep -q "Claude" "$SCRIPT_CONFIG_FILE"
+}
+
+@test "configure_claude skips config when user declines" {
+    mkdir -p "$HOME/.local/bin"
+    touch "$HOME/.local/bin/claude"
+    export RESPONSE="n"
+
+    run configure_claude
+
+    ! grep -q "Claude" "$SCRIPT_CONFIG_FILE"
 }

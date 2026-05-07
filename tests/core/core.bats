@@ -8,17 +8,17 @@ setup() {
 }
 
 @test "Build artifact exists" {
-  run ls $PROJECT_ROOT/dist/myshell_rfd-v1.1.0
+  run ls $PROJECT_ROOT/dist/myshell_rfd-v1.2.2
   [ "$status" -eq 0 ]
 }
 
 @test "Script runs and shows version" {
-    run bash $PROJECT_ROOT/dist/myshell_rfd-v1.1.0 --version
+    run bash $PROJECT_ROOT/dist/myshell_rfd-v1.2.2 --version
     # Check if the output contains the version string
-    [[ "$output" == *"MyShell_RFD v1.1.0"* ]]
-    
+    [[ "$output" == *"MyShell_RFD v1.2.2"* ]]
+
     # Check if it's executable
-    [ -x "$PROJECT_ROOT/dist/myshell_rfd-v1.1.0" ]
+    [ -x "$PROJECT_ROOT/dist/myshell_rfd-v1.2.2" ]
 }
 
 @test "Colors module defines variables" {

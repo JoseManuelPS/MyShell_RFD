@@ -79,10 +79,25 @@ teardown() {
     local zshrc="$HOME/.zshrc"
     echo 'ZSH_THEME="robbyrussell"' > "$zshrc"
     mock_command "git" "mkdir -p $BATS_TMPDIR/fake_home/.oh-my-zsh/custom/themes/powerlevel10k"
-    
+
     export RESPONSE="y"
     run configure_p10k
-    
+
     grep 'ZSH_THEME="powerlevel10k/powerlevel10k"' "$zshrc"
     grep "PowerLevel10K" "$SCRIPT_CONFIG_FILE"
+}
+
+@test "configure_docker skips when binary missing" {
+    run configure_docker
+    [ ! -f "$MOCK_BIN_DIR/omz_plugins.log" ]
+}
+
+@test "configure_github skips when binary missing" {
+    run configure_github
+    [ ! -f "$SCRIPT_CONFIG_FILE" ]
+}
+
+@test "configure_nvm skips when nvm dir missing" {
+    run configure_nvm
+    [ ! -f "$SCRIPT_CONFIG_FILE" ]
 }

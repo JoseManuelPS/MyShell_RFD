@@ -36,7 +36,7 @@ teardown() {
     mock_command "infracost" "echo 1"
     export RESPONSE="y"
     run configure_infracost
-    grep "source <(infracost completion --shell zsh); compdef _infracost infracost" "$SCRIPT_CONFIG_FILE"
+    grep "source <(infracost completion --shell zsh 2>/dev/null); compdef _infracost infracost" "$SCRIPT_CONFIG_FILE"
 }
 
 @test "configure_sops adds SOPS completion if approved" {
@@ -44,4 +44,28 @@ teardown() {
     export RESPONSE="y"
     run configure_sops
     grep "source <(sops completion zsh)" "$SCRIPT_CONFIG_FILE"
+}
+
+@test "configure_infracost skips when binary missing" {
+    run configure_infracost
+    [ ! -f "$SCRIPT_CONFIG_FILE" ]
+}
+
+@test "configure_infracost skips when user declines" {
+    mock_command "infracost" "echo 1"
+    export RESPONSE="n"
+    run configure_infracost
+    [ ! -f "$SCRIPT_CONFIG_FILE" ]
+}
+
+@test "configure_sops skips when binary missing" {
+    run configure_sops
+    [ ! -f "$SCRIPT_CONFIG_FILE" ]
+}
+
+@test "configure_sops skips when user declines" {
+    mock_command "sops" "echo 1"
+    export RESPONSE="n"
+    run configure_sops
+    [ ! -f "$SCRIPT_CONFIG_FILE" ]
 }
